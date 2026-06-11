@@ -26,6 +26,8 @@ import {
   ShieldCheck,
   Code
 } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
+
 
 export default function Dashboard() {
   // Queries
@@ -301,7 +303,9 @@ export default function Dashboard() {
             </div>
             <div className="p-2">
               {activityLoading ? (
-                <div className="p-4 text-center text-[#c9c9c9] text-xs">Cargando...</div>
+                <div className="p-8 flex items-center justify-center">
+                  <Loader size={0.6} />
+                </div>
               ) : activity?.length === 0 ? (
                 <div className="p-4 text-center text-[#c9c9c9] text-xs">No hay actividad reciente.</div>
               ) : (

@@ -18,6 +18,7 @@ import {
   FileText,
   UserCheck
 } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 export default function ClientsPage() {
   const [search, setSearch] = useState("");
@@ -130,9 +131,9 @@ export default function ClientsPage() {
 
           {/* Clients Listing */}
           {isLoading ? (
-            <div className="p-16 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="w-10 h-10 animate-spin text-[#D4A853]" />
-              <span className="text-xs text-[#c9c9c9] font-medium uppercase tracking-wider animate-pulse drop-shadow-md">Sincronizando con Cloudflare...</span>
+            <div className="p-16 flex flex-col items-center justify-center gap-4">
+              <Loader size={1.1} />
+              <span className="text-xs text-[#c9c9c9] font-bold uppercase tracking-wider animate-pulse drop-shadow-md mt-2">Sincronizando con Cloudflare...</span>
             </div>
           ) : (
             <div className="overflow-x-auto">

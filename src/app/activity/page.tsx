@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Loader2, Users, FolderKanban, FileText, Bot } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 export default function ActivityPage() {
   const { data: activity, isLoading } = useQuery({
@@ -46,8 +47,8 @@ export default function ActivityPage() {
         
         <div className="relative z-10 p-6">
           {isLoading ? (
-            <div className="p-12 flex justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-[#D4A853]" />
+            <div className="p-16 flex items-center justify-center">
+              <Loader size={1.0} />
             </div>
           ) : activity?.length === 0 ? (
             <div className="p-12 text-center text-[#c9c9c9] drop-shadow-md">No hay actividad registrada en el sistema.</div>
