@@ -13,19 +13,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  if (isLoginPage) {
-    return (
-      <div className="relative min-h-screen w-full flex items-center justify-center overflow-auto bg-[#0c0c0e]">
-        <AnimatedBackground />
-        <div className="relative z-10 w-full flex items-center justify-center p-4">
-          {children}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-[#0c0c0e]">
