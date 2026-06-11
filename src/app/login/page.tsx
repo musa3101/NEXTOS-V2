@@ -42,7 +42,7 @@ export default function LoginPage() {
       {/* Dynamic Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-40 scale-105 filter blur-[2px]"
-        style={{ backgroundImage: "url(/bg/services-bg.jpg)" }}
+        style={{ backgroundImage: "url(/bg/header-bg.jpg)" }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-black/85 to-[#0c0c0e]/95" />
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-15 mix-blend-overlay" />
@@ -55,7 +55,7 @@ export default function LoginPage() {
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-[#D4A853] to-[#C29641] rounded-full blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
             <img 
-              src="/logo2.jpg" 
+              src="/logo1.png" 
               alt="MyNext Seal" 
               className="relative w-16 h-16 rounded-full border border-[#D4A853]/55 object-cover shadow-2xl bg-black"
             />
@@ -77,15 +77,10 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Uiverse flip-card form */}
+        {/* Login form */}
         <div className="login-wrapper">
           <div className="card-switch">
-            <label className="switch">
-              <input type="checkbox" className="toggle" />
-              <span className="slider"></span>
-              <span className="card-side"></span>
-              
-              <div className="flip-card__inner" onClick={(e) => e.stopPropagation()}>
+              <div className="flip-card__inner">
                 {/* Front Side: Log In */}
                 <div className="flip-card__front">
                   <div className="title font-black">Iniciar Sesión</div>
@@ -117,24 +112,7 @@ export default function LoginPage() {
                     </button>
                   </form>
                 </div>
-                
-                {/* Back Side: Sign Up */}
-                <div className="flip-card__back">
-                  <div className="title font-black font-semibold">Crear Cuenta</div>
-                  <div className="flex-1 flex flex-col items-center justify-center p-4 text-center space-y-4">
-                    <div className="p-3 bg-[#D4A853]/10 border border-[#D4A853]/20 text-[#D4A853] rounded-full">
-                      <Info className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">Registro Restringido</p>
-                      <p className="text-[11px] text-[#A3A3A3] mt-1.5 leading-relaxed">
-                        Este es un sistema operativo cerrado para personal autorizado. Si eres cliente, ponte en contacto con Musa para recibir tus credenciales de acceso.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
-            </label>
           </div>
         </div>
 
