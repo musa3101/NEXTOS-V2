@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FolderKanban, FileText, Activity, ActivitySquare } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { 
+  LayoutDashboard, 
+  Users, 
+  FolderKanban, 
+  FileText, 
+  Activity, 
+  ActivitySquare, 
+  LogOut 
+} from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -19,6 +27,19 @@ interface SidebarProps {
 
 export function Sidebar({ onLinkClick }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        router.push("/login");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Failed to logout:", error);
+    }
+  };
 
   return (
     <div className="w-full md:w-64 glass md:border-r border-[#333] flex flex-col h-full bg-[#1A1A1A]/30 relative z-10 backdrop-blur-xl">
@@ -60,17 +81,23 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
       </nav>
 
       <div className="p-4 border-t border-[#333] bg-[#1A1A1A]/10">
-        <div className="flex items-center gap-3 px-3 py-2 text-sm text-[#A3A3A3] rounded-xl border border-transparent hover:border-[#333] transition-colors">
-          <img 
-            src="/logo2.jpg" 
-            alt="Admin Avatar" 
-            className="w-8 h-8 rounded-full border border-[#D4A853]/50 object-cover shadow-sm bg-[#111]"
-          />
-          <div className="flex flex-col">
-            <span className="font-semibold text-white text-sm">Admin</span>
-            <span className="text-xs text-[#A3A3A3]">NextOS System</span>
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-[#A3A3A3] rounded-xl border border-transparent hover:border-red-500/30 hover:bg-red-500/5 transition-all group/logout cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <img 
+              src="/logo2.jpg" 
+              alt="Admin Avatar" 
+              className="w-8 h-8 rounded-full border border-[#D4A853]/50 group-hover/logout:border-red-500/40 object-cover shadow-sm bg-[#111] transition-colors"
+            />
+            <div className="flex flex-col text-left">
+              <span className="font-semibold text-white text-sm group-hover/logout:text-red-400 transition-colors">Admin</span>
+              <span className="text-xs text-[#A3A3A3] group-hover/logout:text-red-500/60 transition-colors">Cerrar sesión</span>
+            </div>
           </div>
-        </div>
+          <LogOut className="w-4 h-4 text-[#555] group-hover/logout:text-red-500 transition-colors" />
+        </button>
       </div>
     </div>
   );
