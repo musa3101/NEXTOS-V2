@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { AnimatedBackground } from "./animated-background";
@@ -11,7 +12,19 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (pathname === "/login") {
+    return (
+      <div className="relative h-screen w-screen overflow-hidden bg-[#0c0c0e]">
+        <AnimatedBackground />
+        <div className="relative z-10 w-full h-full">
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-[#0c0c0e]">

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Loader2, X } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 export default function ProjectsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -90,8 +91,8 @@ export default function ProjectsPage() {
         
         <div className="relative z-10">
           {isLoading ? (
-            <div className="p-12 flex justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-[#D4A853]" />
+            <div className="p-16 flex items-center justify-center">
+              <Loader size={1.0} />
             </div>
           ) : (
             <Table>

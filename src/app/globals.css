@@ -430,3 +430,369 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════ */
+/* UIVERSE CUSTOM POLYGON LOADER                              */
+/* ═══════════════════════════════════════════════════════════ */
+
+.uiverse-loader {
+  --color-one: #ffbf48;
+  --color-two: #be4a1d;
+  --color-three: #ffbf4780;
+  --color-four: #bf4a1d80;
+  --color-five: #ffbf4740;
+  --time-animation: 2s;
+  --size: 1;
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 25px 0 var(--color-three),
+    0 20px 50px 0 var(--color-four);
+  animation: colorize calc(var(--time-animation) * 3) ease-in-out infinite;
+}
+
+.uiverse-loader::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border-top: solid 1px var(--color-one);
+  border-bottom: solid 1px var(--color-two);
+  background: linear-gradient(180deg, var(--color-five), var(--color-four));
+  box-shadow:
+    inset 0 10px 10px 0 var(--color-three),
+    inset 0 -10px 10px 0 var(--color-four);
+}
+
+.uiverse-loader .box {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(
+    180deg,
+    var(--color-one) 30%,
+    var(--color-two) 70%
+  );
+}
+
+.uiverse-loader svg {
+  position: absolute;
+}
+
+.uiverse-loader svg #clipping {
+  filter: contrast(15);
+  animation: roundness calc(var(--time-animation) / 2) linear infinite;
+}
+
+.uiverse-loader svg #clipping polygon {
+  filter: blur(7px);
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(1) {
+  transform-origin: 75% 25%;
+  transform: rotate(90deg);
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(2) {
+  transform-origin: 50% 50%;
+  animation: rotation var(--time-animation) linear infinite reverse;
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(3) {
+  transform-origin: 50% 60%;
+  animation: rotation var(--time-animation) linear infinite;
+  animation-delay: calc(var(--time-animation) / -3);
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(4) {
+  transform-origin: 40% 40%;
+  animation: rotation var(--time-animation) linear infinite reverse;
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(5) {
+  transform-origin: 40% 40%;
+  animation: rotation var(--time-animation) linear infinite reverse;
+  animation-delay: calc(var(--time-animation) / -2);
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(6) {
+  transform-origin: 60% 40%;
+  animation: rotation var(--time-animation) linear infinite;
+}
+
+.uiverse-loader svg #clipping polygon:nth-child(7) {
+  transform-origin: 60% 40%;
+  animation: rotation var(--time-animation) linear infinite;
+  animation-delay: calc(var(--time-animation) / -1.5);
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes roundness {
+  0% {
+    filter: contrast(15);
+  }
+  20% {
+    filter: contrast(3);
+  }
+  40% {
+    filter: contrast(3);
+  }
+  60% {
+    filter: contrast(15);
+  }
+  100% {
+    filter: contrast(15);
+  }
+}
+
+@keyframes colorize {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    filter: hue-rotate(-30deg);
+  }
+  40% {
+    filter: hue-rotate(-60deg);
+  }
+  60% {
+    filter: hue-rotate(-90deg);
+  }
+  80% {
+    filter: hue-rotate(-45deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════ */
+/* UIVERSE FLIP-CARD LOGIN STYLES                             */
+/* ═══════════════════════════════════════════════════════════ */
+
+.login-wrapper {
+  --input-focus: #D4A853; /* Gold */
+  --font-color: #ffffff;  /* White */
+  --font-color-sub: #A3A3A3; /* Muted grey */
+  --bg-color: #161616;    /* Dark card background */
+  --bg-color-alt: #262626;
+  --main-color: #D4A853;  /* Gold accent border */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* switch card */
+.login-wrapper .switch {
+  transform: translateY(-40px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  width: 50px;
+  height: 20px;
+  user-select: none;
+}
+
+.login-wrapper .card-side::before {
+  position: absolute;
+  content: 'Log in';
+  left: -70px;
+  top: 0;
+  width: 100px;
+  text-decoration: underline;
+  color: var(--font-color);
+  font-weight: 600;
+  text-align: right;
+  cursor: pointer;
+}
+
+.login-wrapper .card-side::after {
+  position: absolute;
+  content: 'Sign up';
+  left: 70px;
+  top: 0;
+  width: 100px;
+  text-decoration: none;
+  color: var(--font-color);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.login-wrapper .toggle {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.login-wrapper .slider {
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-color);
+  transition: 0.3s;
+}
+
+.login-wrapper .slider:before {
+  box-sizing: border-box;
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  left: -2px;
+  bottom: 2px;
+  background-color: var(--bg-color);
+  box-shadow: 0 3px 0 var(--main-color);
+  transition: 0.3s;
+}
+
+.login-wrapper .toggle:checked + .slider {
+  background-color: var(--bg-color-alt);
+}
+
+.login-wrapper .toggle:checked + .slider:before {
+  transform: translateX(30px);
+}
+
+.login-wrapper .toggle:checked ~ .card-side:before {
+  text-decoration: none;
+}
+
+.login-wrapper .toggle:checked ~ .card-side:after {
+  text-decoration: underline;
+}
+
+/* card */ 
+.login-wrapper .flip-card__inner {
+  width: 320px;
+  height: 380px;
+  position: relative;
+  background-color: transparent;
+  perspective: 1000px;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.login-wrapper .toggle:checked ~ .flip-card__inner {
+  transform: rotateY(180deg);
+}
+
+.login-wrapper .toggle:checked ~ .flip-card__front {
+  box-shadow: none;
+}
+
+.login-wrapper .flip-card__front, .login-wrapper .flip-card__back {
+  padding: 30px 25px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: rgba(22, 22, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  gap: 20px;
+  border-radius: 16px;
+  border: 2px solid var(--main-color);
+  box-shadow: 5px 5px 0px 0px var(--main-color), 0 0 30px rgba(212, 168, 83, 0.15);
+}
+
+.login-wrapper .flip-card__back {
+  transform: rotateY(180deg);
+}
+
+.login-wrapper .flip-card__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.login-wrapper .title {
+  margin: 10px 0 20px 0;
+  font-size: 26px;
+  font-weight: 950;
+  text-align: center;
+  color: var(--main-color);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(212, 168, 83, 0.2);
+}
+
+.login-wrapper .flip-card__input {
+  width: 250px;
+  height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--main-color);
+  background-color: rgba(0, 0, 0, 0.6);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+  padding: 5px 15px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.login-wrapper .flip-card__input::placeholder {
+  color: var(--font-color-sub);
+  opacity: 0.6;
+}
+
+.login-wrapper .flip-card__input:focus {
+  border: 2px solid var(--input-focus);
+  box-shadow: 2px 2px var(--main-color), 0 0 10px rgba(212, 168, 83, 0.3);
+}
+
+.login-wrapper .flip-card__btn:active {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+.login-wrapper .flip-card__btn {
+  margin-top: 15px;
+  width: 140px;
+  height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--font-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-wrapper .flip-card__btn:hover {
+  background-color: var(--main-color);
+  color: #000;
+}
