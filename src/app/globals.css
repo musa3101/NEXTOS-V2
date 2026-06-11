@@ -595,10 +595,21 @@
   justify-content: center;
 }
 
+/* Container for switch and card to prevent vertical overlap and allocate proper space */
+.login-wrapper .card-switch {
+  position: relative;
+  width: 320px;
+  height: 460px; /* Switch (20px) + Gap (40px) + Card (380px) + Shadow margin (20px) = 460px */
+  display: flex;
+  justify-content: center;
+}
+
 /* switch card */
 .login-wrapper .switch {
-  transform: translateY(-40px);
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -691,7 +702,11 @@
 .login-wrapper .flip-card__inner {
   width: 320px;
   height: 380px;
-  position: relative;
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-shrink: 0;
   background-color: transparent;
   perspective: 1000px;
   text-align: center;
@@ -700,7 +715,7 @@
 }
 
 .login-wrapper .toggle:checked ~ .flip-card__inner {
-  transform: rotateY(180deg);
+  transform: translateX(-50%) rotateY(180deg);
 }
 
 .login-wrapper .toggle:checked ~ .flip-card__front {

@@ -85,7 +85,7 @@ export default function LoginPage() {
               <span className="slider"></span>
               <span className="card-side"></span>
               
-              <div className="flip-card__inner">
+              <div className="flip-card__inner" onClick={(e) => e.stopPropagation()}>
                 {/* Front Side: Log In */}
                 <div className="flip-card__front">
                   <div className="title font-black">Iniciar Sesión</div>
