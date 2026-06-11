@@ -1,3 +1,4 @@
+export const runtime = "edge";
 import { NextResponse } from "next/server";
 import { sendMessage, sendDocument } from "@/lib/telegram";
 import { supabaseAdmin } from "@/lib/supabase/server";
