@@ -118,16 +118,18 @@ export default function Dashboard() {
               href="https://mynextbymusa.com/" 
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 bg-[#D4A853]/10 hover:bg-[#D4A853]/20 backdrop-blur-md border border-[#D4A853]/30 px-6 py-4 rounded-xl text-white shadow-[0_0_20px_rgba(212,168,83,0.15)] hover:shadow-[0_0_30px_rgba(212,168,83,0.3)] transition-all group/btn"
+              className="uiverse-btn-gold px-6 py-4 group/btn"
             >
-              <div className="p-2 bg-[#D4A853]/20 rounded-lg">
-                <Globe className="w-5 h-5 text-[#D4A853]" />
+              <div className="relative z-10 flex items-center gap-3">
+                <div className="p-2 bg-[#D4A853]/20 rounded-lg">
+                  <Globe className="w-5 h-5 text-[#D4A853]" />
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] text-[#A3A3A3] font-bold uppercase tracking-widest">Portal Público</span>
+                  <span className="text-sm font-semibold group-hover/btn:text-[#D4A853] transition-colors">mynextbymusa.com</span>
+                </div>
+                <ExternalLink className="w-4 h-4 text-[#A3A3A3] ml-2 group-hover/btn:translate-x-1 transition-transform" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] text-[#A3A3A3] font-bold uppercase tracking-widest">Portal Público</span>
-                <span className="text-sm font-semibold group-hover/btn:text-[#D4A853] transition-colors">mynextbymusa.com</span>
-              </div>
-              <ExternalLink className="w-4 h-4 text-[#A3A3A3] ml-2 group-hover/btn:translate-x-1 transition-transform" />
             </a>
           </div>
         </div>
@@ -145,38 +147,57 @@ export default function Dashboard() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {portfolioProjects.map((project, idx) => (
-            <div key={idx} className="group relative overflow-hidden rounded-xl border border-[#333]/80 bg-[#1A1A1A]/40 backdrop-blur-sm shadow-lg hover:border-[#D4A853]/40 transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4A853]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative p-5">
-                <div className="flex justify-between items-start mb-4">
-                  <Badge 
-                    variant={project.status === "production" ? "success" : project.status === "development" ? "info" : "warning"}
-                    className="backdrop-blur-md"
-                  >
-                    {project.status === "production" ? "Producción" : project.status === "development" ? "En Desarrollo" : "Mantenimiento"}
-                  </Badge>
-                  <a href={`https://${project.url}`} target="_blank" rel="noreferrer" className="text-[#A3A3A3] hover:text-[#D4A853] transition-colors p-1">
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-                <h3 className="text-lg font-bold text-white drop-shadow-md">{project.name}</h3>
-                <p className="text-xs text-[#888] font-mono mt-1">{project.url}</p>
-                <div className="mt-4 pt-4 border-t border-[#333]/50 flex items-center justify-between">
-                  <span className="text-xs text-[#A3A3A3] flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-[#555]" /> {project.type}</span>
-                  <span className="flex h-2 w-2 relative">
-                    {project.status === "production" && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                    <span className={`relative inline-flex rounded-full h-2 w-2 ${project.status === "production" ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                  </span>
+          {portfolioProjects.map((project, idx) => {
+            const beamClass = 
+              project.status === "production" 
+                ? "uiverse-card-beam-emerald" 
+                : project.status === "development" 
+                ? "uiverse-card-beam-gold" 
+                : "uiverse-card-beam-amber";
+
+            return (
+              <div key={idx} className={`group uiverse-card-beam ${beamClass} transition-all duration-300`}>
+                <div className="relative z-10 p-5 h-full flex flex-col justify-between min-h-[160px]">
+                  <div>
+                    <div className="flex justify-between items-start mb-4">
+                      <Badge 
+                        variant={project.status === "production" ? "success" : project.status === "development" ? "info" : "warning"}
+                        className="backdrop-blur-md shadow-[0_0_10px_rgba(255,255,255,0.02)]"
+                      >
+                        {project.status === "production" ? "Producción" : project.status === "development" ? "En Desarrollo" : "Mantenimiento"}
+                      </Badge>
+                      <a href={`https://${project.url}`} target="_blank" rel="noreferrer" className="text-[#A3A3A3] hover:text-[#D4A853] transition-colors p-1 relative z-20">
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                    <h3 className="text-lg font-bold text-white drop-shadow-md">{project.name}</h3>
+                    <p className="text-xs text-[#888] font-mono mt-1">{project.url}</p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-[#333]/40 flex items-center justify-between">
+                    <span className="text-xs text-[#A3A3A3] flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-[#555]" /> {project.type}</span>
+                    <span className="flex h-2.5 w-2.5 relative">
+                      {project.status === "production" ? (
+                        <>
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 pulse-radar-emerald"></span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500 pulse-radar-amber"></span>
+                        </>
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           
           {/* Quick Add Project Card */}
-          <Link href="/projects" className="group relative overflow-hidden rounded-xl border border-dashed border-[#555] bg-transparent hover:bg-white/5 hover:border-[#D4A853]/50 transition-all duration-300 flex flex-col items-center justify-center p-8 min-h-[160px]">
-            <div className="w-12 h-12 rounded-full bg-[#333] group-hover:bg-[#D4A853]/20 flex items-center justify-center mb-3 transition-colors">
-              <Plus className="w-6 h-6 text-[#A3A3A3] group-hover:text-[#D4A853]" />
+          <Link href="/projects" className="group uiverse-dashed-card flex flex-col items-center justify-center p-8 min-h-[160px]">
+            <div className="w-12 h-12 rounded-full bg-[#333]/60 group-hover:bg-[#D4A853]/20 flex items-center justify-center mb-3 transition-all duration-300 shadow-[inset_0_0_8px_rgba(0,0,0,0.4)]">
+              <Plus className="w-6 h-6 text-[#A3A3A3] group-hover:text-[#D4A853] transition-colors" />
             </div>
             <span className="text-sm font-semibold text-[#A3A3A3] group-hover:text-white transition-colors">Añadir Nuevo Proyecto</span>
           </Link>
@@ -323,13 +344,13 @@ export default function Dashboard() {
 
           {/* Quick Actions (Minimalist) */}
           <div className="grid grid-cols-2 gap-3">
-            <Link href="/clients" className="flex flex-col items-center justify-center p-4 rounded-xl bg-[#1A1A1A]/60 border border-[#333] hover:bg-[#D4A853]/10 hover:border-[#D4A853]/40 transition-all group text-center gap-2">
-              <Users className="w-5 h-5 text-[#A3A3A3] group-hover:text-[#D4A853] transition-colors" />
-              <span className="text-xs font-semibold text-white">Nuevo Cliente</span>
+            <Link href="/clients" className="uiverse-action-btn-gold flex flex-col items-center justify-center p-4 rounded-xl bg-[#1A1A1A]/50 border border-[#333] text-center gap-2">
+              <Users className="w-5 h-5 text-[#A3A3A3] group-hover:text-[#D4A853] transition-colors relative z-10" />
+              <span className="text-xs font-semibold text-white relative z-10">Nuevo Cliente</span>
             </Link>
-            <Link href="/documents" className="flex flex-col items-center justify-center p-4 rounded-xl bg-[#1A1A1A]/60 border border-[#333] hover:bg-blue-500/10 hover:border-blue-500/40 transition-all group text-center gap-2">
-              <FileText className="w-5 h-5 text-[#A3A3A3] group-hover:text-blue-400 transition-colors" />
-              <span className="text-xs font-semibold text-white">Facturar</span>
+            <Link href="/documents" className="uiverse-action-btn-blue flex flex-col items-center justify-center p-4 rounded-xl bg-[#1A1A1A]/50 border border-[#333] text-center gap-2">
+              <FileText className="w-5 h-5 text-[#A3A3A3] group-hover:text-blue-400 transition-colors relative z-10" />
+              <span className="text-xs font-semibold text-white relative z-10">Facturar</span>
             </Link>
           </div>
 
@@ -346,7 +367,7 @@ export default function Dashboard() {
                 <span className="flex items-center gap-2"><Cpu className="w-4 h-4 text-[#D4A853]" /> Servidor Ubuntu</span>
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 pulse-radar-emerald"></span>
                 </span>
               </h3>
               
@@ -356,7 +377,7 @@ export default function Dashboard() {
                   <span className="text-white">{cpu}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                  <div className="h-full bg-[#D4A853]" style={{ width: `${cpu}%` }} />
+                  <div className="h-full bg-[#D4A853] progress-shimmer transition-all duration-500" style={{ width: `${cpu}%` }} />
                 </div>
               </div>
 
@@ -366,7 +387,7 @@ export default function Dashboard() {
                   <span className="text-white">{ram} GB / 8 GB</span>
                 </div>
                 <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                  <div className="h-full bg-emerald-500" style={{ width: `${(ram / 8) * 100}%` }} />
+                  <div className="h-full bg-emerald-500 progress-shimmer transition-all duration-500" style={{ width: `${(ram / 8) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -420,7 +441,19 @@ function ServiceStatus({ name, status, icon: Icon, latency }: any) {
           {latency !== undefined && <p className="text-[9px] text-[#888] mt-0.5">Latencia: {latency}ms</p>}
         </div>
       </div>
-      <div className={`h-2 w-2 rounded-full ${isUp ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]"}`} />
+      <div className="h-2.5 w-2.5 rounded-full relative">
+        {isUp ? (
+          <>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 pulse-radar-emerald"></span>
+          </>
+        ) : (
+          <>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
