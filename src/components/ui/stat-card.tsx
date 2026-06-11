@@ -15,7 +15,7 @@ interface StatCardProps {
 
 export function StatCard({ title, value, icon: Icon, description, trend, bgImage }: StatCardProps) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-[#333] shadow-lg hover-glow transition-all duration-300 group">
+    <div className="relative overflow-hidden rounded-xl border border-[#333] shadow-lg hover-glow transition-all duration-300 group uiverse-stat-card">
       {/* Background image layer */}
       {bgImage && (
         <div

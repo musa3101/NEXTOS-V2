@@ -93,3 +93,340 @@
   transform: scale(1.1);
 }
 
+/* ═══════════════════════════════════════════════════════════ */
+/* UIVERSE PREMIUM EFFECTS & ANIMATIONS                       */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* Golden Conic Border Button */
+.uiverse-btn-gold {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.uiverse-btn-gold::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 35%,
+    #D4A853 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  animation: rotate-conic 4s linear infinite;
+  z-index: -2;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.uiverse-btn-gold::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  background: #111;
+  border-radius: 11px;
+  z-index: -1;
+  transition: background 0.3s ease;
+}
+
+.uiverse-btn-gold:hover::before {
+  animation: rotate-conic 2s linear infinite;
+  opacity: 1;
+}
+
+.uiverse-btn-gold:hover::after {
+  background: rgba(26, 26, 26, 0.95);
+}
+
+.uiverse-btn-gold:hover {
+  box-shadow: 0 0 25px rgba(212, 168, 83, 0.35);
+  border-color: rgba(212, 168, 83, 0.6);
+  transform: translateY(-2px);
+}
+
+@keyframes rotate-conic {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Card with moving laser border (Conic gradient spin) */
+.uiverse-card-beam {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.uiverse-card-beam::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 45%,
+    var(--beam-color, #D4A853) 50%,
+    transparent 55%,
+    transparent 100%
+  );
+  animation: rotate-conic 6s linear infinite;
+  z-index: -2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.uiverse-card-beam::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 11px;
+  z-index: -1;
+}
+
+.uiverse-card-beam:hover::before {
+  opacity: 1;
+}
+
+.uiverse-card-beam:hover {
+  border-color: var(--beam-color-hover, rgba(212, 168, 83, 0.4));
+  box-shadow: 0 0 25px var(--beam-glow, rgba(212, 168, 83, 0.15));
+  transform: translateY(-3px);
+}
+
+/* Variants for card-beam colors */
+.uiverse-card-beam-gold {
+  --beam-color: #D4A853;
+  --beam-color-hover: rgba(212, 168, 83, 0.45);
+  --beam-glow: rgba(212, 168, 83, 0.2);
+}
+.uiverse-card-beam-emerald {
+  --beam-color: #10B981;
+  --beam-color-hover: rgba(16, 185, 129, 0.45);
+  --beam-glow: rgba(16, 185, 129, 0.2);
+}
+.uiverse-card-beam-amber {
+  --beam-color: #F59E0B;
+  --beam-color-hover: rgba(245, 158, 11, 0.45);
+  --beam-glow: rgba(245, 158, 11, 0.2);
+}
+
+/* Running Dashed Border for Adding projects */
+.uiverse-dashed-card {
+  position: relative;
+  background-image: linear-gradient(90deg, #555 50%, transparent 50%),
+                    linear-gradient(90deg, #555 50%, transparent 50%),
+                    linear-gradient(0deg, #555 50%, transparent 50%),
+                    linear-gradient(0deg, #555 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 15px 1.5px, 15px 1.5px, 1.5px 15px, 1.5px 15px;
+  background-position: 0px 0px, 100% 100%, 0px 100%, 100% 0px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.uiverse-dashed-card:hover {
+  background-image: linear-gradient(90deg, #D4A853 50%, transparent 50%),
+                    linear-gradient(90deg, #D4A853 50%, transparent 50%),
+                    linear-gradient(0deg, #D4A853 50%, transparent 50%),
+                    linear-gradient(0deg, #D4A853 50%, transparent 50%);
+  animation: border-dance 0.8s linear infinite;
+  background-color: rgba(212, 168, 83, 0.05);
+  box-shadow: 0 0 15px rgba(212, 168, 83, 0.1);
+  transform: translateY(-2px);
+}
+
+@keyframes border-dance {
+  0% {
+    background-position: 0px 0px, 100% 100%, 0px 100%, 100% 0px;
+  }
+  100% {
+    background-position: 15px 0px, calc(100% - 15px) 100%, 0px calc(100% - 15px), 100% 15px;
+  }
+}
+
+/* Glare / Metallic Shine on Hover for Stats Card */
+.uiverse-stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.uiverse-stat-card::after {
+  content: '';
+  position: absolute;
+  top: -150%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 55%
+  );
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.uiverse-stat-card:hover::after {
+  animation: hover-shine 1.2s ease-out forwards;
+}
+
+@keyframes hover-shine {
+  0% {
+    top: -150%;
+    left: -50%;
+  }
+  100% {
+    top: 100%;
+    left: 100%;
+  }
+}
+
+/* Slide Gradient hover actions */
+.uiverse-action-btn-gold {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.uiverse-action-btn-gold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(212, 168, 83, 0.18) 0%, rgba(212, 168, 83, 0.03) 100%);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.uiverse-action-btn-gold:hover::before {
+  width: 100%;
+}
+
+.uiverse-action-btn-gold:hover {
+  border-color: rgba(212, 168, 83, 0.4);
+  box-shadow: 0 0 15px rgba(212, 168, 83, 0.15);
+  transform: translateY(-1px);
+}
+
+.uiverse-action-btn-blue {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.uiverse-action-btn-blue::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.18) 0%, rgba(59, 130, 246, 0.03) 100%);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.uiverse-action-btn-blue:hover::before {
+  width: 100%;
+}
+
+.uiverse-action-btn-blue:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Progress fill shimmer */
+.progress-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer-flow 2s infinite ease-in-out;
+}
+
+@keyframes shimmer-flow {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Status indicators pulsing wave radar */
+.pulse-radar-emerald {
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: radar-green 2s infinite cubic-bezier(0.4, 0, 0, 1);
+}
+
+.pulse-radar-amber {
+  box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  animation: radar-orange 2s infinite cubic-bezier(0.4, 0, 0, 1);
+}
+
+@keyframes radar-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes radar-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
