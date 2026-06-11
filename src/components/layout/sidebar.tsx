@@ -51,7 +51,7 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
             className="w-7 h-7 object-contain rounded-md border border-[#333] p-0.5 bg-[#111] group-hover:scale-105 transition-transform" 
           />
           <span className="text-lg font-bold tracking-widest text-white">
-            MY<span className="text-[#D4A853]">NEXT</span>
+            Next <span className="text-[#D4A853]">LaB</span>
           </span>
         </Link>
       </div>
