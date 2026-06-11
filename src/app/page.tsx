@@ -20,7 +20,11 @@ import {
   Zap, 
   TrendingUp, 
   Activity,
-  Plus
+  Plus,
+  Globe,
+  ExternalLink,
+  ShieldCheck,
+  Code
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -67,103 +71,171 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  const portfolioProjects = [
+    { name: "Blessed Barber Studio", url: "blessedbarber.es", status: "production", type: "Web & Reserva" },
+    { name: "Bar Cafetería Luna Llena", url: "lunallena.com", status: "production", type: "Web & Menú Digital" },
+    { name: "Ecuaplac", url: "ecuaplac.es", status: "production", type: "Corporate Web" },
+    { name: "RBARI RESTAURANT", url: "rbari.com", status: "development", type: "Web & Menú" },
+    { name: "NEXT ERA", url: "nextera.dev", status: "maintenance", type: "E-commerce" }
+  ];
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
       
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* HEADER SECTION — Misty Peak background                     */}
+      {/* HERO SECTION — Branding MYNEXT                              */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#333]/50 group">
+      <div className="relative overflow-hidden rounded-3xl border border-[#D4A853]/20 shadow-2xl group">
         {/* BG Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
           style={{ backgroundImage: "url(/bg/header-bg.jpg)" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
         
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 md:p-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#D4A853] animate-ping" />
-              <span className="text-[10px] text-[#D4A853] font-bold uppercase tracking-widest drop-shadow-lg">SaaS Core Principal</span>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 md:p-12">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A853] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#D4A853]"></span>
+              </span>
+              <span className="text-xs text-[#D4A853] font-bold uppercase tracking-[0.2em] drop-shadow-lg">
+                Arquitectura Digital Premium
+              </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-xl">Bienvenido a NextOS</h1>
-            <p className="text-[#d1d1d1] text-sm mt-1 drop-shadow-lg">Control centralizado, monitorización en tiempo real y automatización de MyNext.</p>
+            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter drop-shadow-2xl">
+              MYNEXT <span className="font-light text-[#A3A3A3]">COMMAND CENTER</span>
+            </h1>
+            <p className="text-[#d1d1d1] text-lg max-w-xl font-medium drop-shadow-lg leading-relaxed">
+              Control centralizado para el imperio digital de Musa. Monitorización en tiempo real, infraestructura y gestión de clientes.
+            </p>
           </div>
           
-          {/* Quick info chip */}
-          <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-5 py-3 rounded-xl text-xs text-[#d1d1d1] shadow-xl">
-            <div className="flex flex-col">
-              <span className="text-[9px] text-[#888] font-bold uppercase">Sesión de Usuario</span>
-              <span className="text-white font-medium">mynextbymusa@gmail.com</span>
-            </div>
+          <div className="flex flex-col gap-3">
+            <a 
+              href="https://mynextbymusa.com/" 
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-3 bg-[#D4A853]/10 hover:bg-[#D4A853]/20 backdrop-blur-md border border-[#D4A853]/30 px-6 py-4 rounded-xl text-white shadow-[0_0_20px_rgba(212,168,83,0.15)] hover:shadow-[0_0_30px_rgba(212,168,83,0.3)] transition-all group/btn"
+            >
+              <div className="p-2 bg-[#D4A853]/20 rounded-lg">
+                <Globe className="w-5 h-5 text-[#D4A853]" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-[#A3A3A3] font-bold uppercase tracking-widest">Portal Público</span>
+                <span className="text-sm font-semibold group-hover/btn:text-[#D4A853] transition-colors">mynextbymusa.com</span>
+              </div>
+              <ExternalLink className="w-4 h-4 text-[#A3A3A3] ml-2 group-hover/btn:translate-x-1 transition-transform" />
+            </a>
           </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* KPI STAT CARDS — Wallpaper 4k dark waves as subtle bg      */}
+      {/* SECTION 1: PORTFOLIO & OPERACIONES                          */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard
-          title="Total Clientes"
-          value={statsLoading ? "-" : stats?.totalClients || 0}
-          icon={Users}
-          description="Clientes registrados en base de datos"
-          trend={{ value: 12, isPositive: true }}
-          bgImage="/bg/header-bg.jpg"
-        />
-        <StatCard
-          title="Proyectos Activos"
-          value={statsLoading ? "-" : stats?.activeProjects || 0}
-          icon={FolderKanban}
-          description="Proyectos en desarrollo / Cloudflare"
-          trend={{ value: 8, isPositive: true }}
-          bgImage="/bg/actions-bg.jpg"
-        />
-        <StatCard
-          title="Documentos"
-          value={statsLoading ? "-" : stats?.documentsGenerated || 0}
-          icon={FileText}
-          description="PDFs de facturación y entregas"
-          trend={{ value: 24, isPositive: true }}
-          bgImage="/bg/chart-bg.jpg"
-        />
-        <StatCard
-          title="Salud del Sistema"
-          value={healthLoading ? "-" : (health?.status === "healthy" ? "Óptimo" : "Degradado")}
-          icon={ActivitySquare}
-          description="Estado general de servidores API"
-          bgImage="/bg/resources-bg.jpg"
-        />
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#D4A853]/10 rounded-lg border border-[#D4A853]/20">
+            <Code className="w-5 h-5 text-[#D4A853]" />
+          </div>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Portfolio & Proyectos Activos</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {portfolioProjects.map((project, idx) => (
+            <div key={idx} className="group relative overflow-hidden rounded-xl border border-[#333]/80 bg-[#1A1A1A]/40 backdrop-blur-sm shadow-lg hover:border-[#D4A853]/40 transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4A853]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <Badge 
+                    variant={project.status === "production" ? "success" : project.status === "development" ? "info" : "warning"}
+                    className="backdrop-blur-md"
+                  >
+                    {project.status === "production" ? "Producción" : project.status === "development" ? "En Desarrollo" : "Mantenimiento"}
+                  </Badge>
+                  <a href={`https://${project.url}`} target="_blank" rel="noreferrer" className="text-[#A3A3A3] hover:text-[#D4A853] transition-colors p-1">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+                <h3 className="text-lg font-bold text-white drop-shadow-md">{project.name}</h3>
+                <p className="text-xs text-[#888] font-mono mt-1">{project.url}</p>
+                <div className="mt-4 pt-4 border-t border-[#333]/50 flex items-center justify-between">
+                  <span className="text-xs text-[#A3A3A3] flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-[#555]" /> {project.type}</span>
+                  <span className="flex h-2 w-2 relative">
+                    {project.status === "production" && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${project.status === "production" ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {/* Quick Add Project Card */}
+          <Link href="/projects" className="group relative overflow-hidden rounded-xl border border-dashed border-[#555] bg-transparent hover:bg-white/5 hover:border-[#D4A853]/50 transition-all duration-300 flex flex-col items-center justify-center p-8 min-h-[160px]">
+            <div className="w-12 h-12 rounded-full bg-[#333] group-hover:bg-[#D4A853]/20 flex items-center justify-center mb-3 transition-colors">
+              <Plus className="w-6 h-6 text-[#A3A3A3] group-hover:text-[#D4A853]" />
+            </div>
+            <span className="text-sm font-semibold text-[#A3A3A3] group-hover:text-white transition-colors">Añadir Nuevo Proyecto</span>
+          </Link>
+        </div>
       </div>
 
+      <hr className="border-[#333]/50" />
+
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* CENTRAL CONTENT GRID                                       */}
+      {/* SECTION 2 & 3: ANALÍTICA Y GESTIÓN TÉCNICA                  */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         
-        {/* Left Column (Chart & Activity) */}
-        <div className="lg:col-span-2 space-y-8">
+        {/* Lado Izquierdo: Analítica SaaS (8 columnas) */}
+        <div className="xl:col-span-8 space-y-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-[#D4A853]/10 rounded-lg border border-[#D4A853]/20">
+              <TrendingUp className="w-5 h-5 text-[#D4A853]" />
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Analítica SaaS</h2>
+          </div>
           
-          {/* ─── CHART CARD — Abstract waves background ─── */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <StatCard
+              title="Total Clientes"
+              value={statsLoading ? "-" : stats?.totalClients || 0}
+              icon={Users}
+              trend={{ value: 12, isPositive: true }}
+              bgImage="/bg/header-bg.jpg"
+            />
+            <StatCard
+              title="Proyectos (Base Datos)"
+              value={statsLoading ? "-" : stats?.activeProjects || 0}
+              icon={FolderKanban}
+              trend={{ value: 8, isPositive: true }}
+              bgImage="/bg/actions-bg.jpg"
+            />
+            <StatCard
+              title="Documentos"
+              value={statsLoading ? "-" : stats?.documentsGenerated || 0}
+              icon={FileText}
+              trend={{ value: 24, isPositive: true }}
+              bgImage="/bg/chart-bg.jpg"
+            />
+          </div>
+
+          {/* Chart Card */}
           <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg hover-glow transition-all duration-300 group">
-            {/* BG Image */}
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
               style={{ backgroundImage: "url(/bg/chart-bg.jpg)" }}
             />
-            <div className="absolute inset-0 bg-black/65 backdrop-blur-[3px]" />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-[#D4A853]/5" />
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-[4px]" />
 
             <div className="relative z-10 p-6">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2 drop-shadow-lg">
-                    <TrendingUp className="w-5 h-5 text-[#D4A853]" /> Rendimiento y Operaciones
-                  </h3>
-                  <p className="text-xs text-[#c9c9c9] mt-0.5 drop-shadow-md">Actividades y peticiones registradas esta semana.</p>
+                  <h3 className="text-lg font-bold text-white drop-shadow-lg">Flujo de Operaciones</h3>
+                  <p className="text-xs text-[#A3A3A3] mt-0.5 drop-shadow-md">Actividades y peticiones registradas esta semana.</p>
                 </div>
                 <Badge variant="warning" className="text-[10px] tracking-wide backdrop-blur-md">
                   Últimos 7 días
@@ -175,247 +247,156 @@ export default function Dashboard() {
                 <svg className="w-full h-full" viewBox="0 0 600 180" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#D4A853" stopOpacity="0.3" />
+                      <stop offset="0%" stopColor="#D4A853" stopOpacity="0.4" />
                       <stop offset="100%" stopColor="#D4A853" stopOpacity="0.0" />
                     </linearGradient>
                   </defs>
-
-                  {/* Grid Lines */}
                   <line x1="0" y1="30" x2="600" y2="30" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" strokeDasharray="3 3" />
                   <line x1="0" y1="75" x2="600" y2="75" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" strokeDasharray="3 3" />
                   <line x1="0" y1="120" x2="600" y2="120" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" strokeDasharray="3 3" />
                   <line x1="0" y1="160" x2="600" y2="160" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" strokeDasharray="3 3" />
-
-                  {/* Area Background Gradient */}
-                  <path 
-                    d="M 0 160 Q 100 120, 200 140 T 400 60 T 600 40 L 600 160 L 0 160 Z" 
-                    fill="url(#chartGrad)" 
-                  />
-
-                  {/* Area Line */}
-                  <path 
-                    d="M 0 160 Q 100 120, 200 140 T 400 60 T 600 40" 
-                    fill="none" 
-                    stroke="#D4A853" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round"
-                  />
-
-                  {/* Chart Dots */}
-                  <circle cx="200" cy="140" r="4" fill="#1A1A1A" stroke="#D4A853" strokeWidth="2" className="cursor-pointer transition-all" />
-                  <circle cx="400" cy="60" r="4" fill="#1A1A1A" stroke="#D4A853" strokeWidth="2" className="cursor-pointer transition-all" />
-                  <circle cx="600" cy="40" r="4" fill="#1A1A1A" stroke="#D4A853" strokeWidth="2" className="cursor-pointer transition-all" />
+                  <path d="M 0 160 Q 100 120, 200 140 T 400 60 T 600 40 L 600 160 L 0 160 Z" fill="url(#chartGrad)" />
+                  <path d="M 0 160 Q 100 120, 200 140 T 400 60 T 600 40" fill="none" stroke="#D4A853" strokeWidth="3" strokeLinecap="round" />
+                  <circle cx="200" cy="140" r="4.5" fill="#1A1A1A" stroke="#D4A853" strokeWidth="2.5" className="cursor-pointer transition-all hover:r-6" />
+                  <circle cx="400" cy="60" r="4.5" fill="#1A1A1A" stroke="#D4A853" strokeWidth="2.5" className="cursor-pointer transition-all hover:r-6" />
+                  <circle cx="600" cy="40" r="4.5" fill="#1A1A1A" stroke="#D4A853" strokeWidth="2.5" className="cursor-pointer transition-all hover:r-6" />
                 </svg>
-                
-                {/* Tooltip */}
-                <div className="absolute top-[35px] left-[375px] bg-black/70 backdrop-blur-md border border-[#D4A853]/40 rounded-md p-1.5 text-[10px] text-[#D4A853] shadow-lg pointer-events-none">
-                  <span className="font-semibold text-white">Pico de Actividad</span>: +14 Logs
-                </div>
               </div>
-
-              {/* X Axis Labels */}
-              <div className="flex justify-between text-[10px] text-[#999] font-semibold uppercase tracking-wider px-2 mt-3">
-                <span>Lun</span>
-                <span>Mar</span>
-                <span>Mié</span>
-                <span>Jue</span>
-                <span>Vie</span>
-                <span>Sáb</span>
-                <span>Dom</span>
+              <div className="flex justify-between text-[10px] text-[#A3A3A3] font-bold uppercase tracking-wider px-2 mt-3">
+                <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
               </div>
             </div>
           </div>
-
-          {/* ─── RECENT ACTIVITY — Mystic Haven background ─── */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Activity className="w-5 h-5 text-[#D4A853]" /> Actividad Reciente
-              </h2>
+          
+          {/* Actividad Reciente integrada aquí para ahorrar espacio */}
+          <div className="relative overflow-hidden rounded-xl border border-[#333]/80 shadow-lg bg-[#1A1A1A]/40 backdrop-blur-sm">
+            <div className="p-4 border-b border-[#333]/50 flex justify-between items-center bg-black/20">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#D4A853]" /> Registro de Actividad
+              </h3>
               <Link href="/activity" className="text-xs text-[#D4A853] hover:underline flex items-center gap-1">
-                Ver historial completo <ArrowRight className="w-3 h-3" />
+                Ver historial <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
-
-            <div className="relative overflow-hidden rounded-xl border border-[#333]/80 shadow-lg group">
-              {/* BG Image */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url(/bg/activity-bg.jpg)" }}
-              />
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
-
-              <div className="relative z-10 p-1">
-                {activityLoading ? (
-                  <div className="p-8 text-center text-[#c9c9c9]">Cargando actividad...</div>
-                ) : activity?.length === 0 ? (
-                  <div className="p-8 text-center text-[#c9c9c9]">No hay actividad reciente.</div>
-                ) : (
-                  <div className="space-y-2 p-2">
-                    {activity?.map((log: any) => (
-                      <div key={log.id} className="bg-black/30 backdrop-blur-md p-4 rounded-xl flex items-start gap-4 hover:bg-black/50 transition-all duration-300 border border-white/5 hover:border-[#D4A853]/20">
-                        <div className="p-2 bg-black/50 backdrop-blur-md rounded-xl border border-white/10 mt-1 shrink-0">
-                          {log.entity_type === "client" && <Users className="w-4 h-4 text-[#D4A853]" />}
-                          {log.entity_type === "project" && <FolderKanban className="w-4 h-4 text-emerald-400" />}
-                          {log.entity_type === "document" && <FileText className="w-4 h-4 text-blue-400" />}
+            <div className="p-2">
+              {activityLoading ? (
+                <div className="p-4 text-center text-[#c9c9c9] text-xs">Cargando...</div>
+              ) : activity?.length === 0 ? (
+                <div className="p-4 text-center text-[#c9c9c9] text-xs">No hay actividad reciente.</div>
+              ) : (
+                <div className="divide-y divide-[#333]/50">
+                  {activity?.slice(0, 3).map((log: any) => ( // Show max 3 here
+                    <div key={log.id} className="p-3 flex items-center justify-between hover:bg-black/20 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="p-1.5 bg-[#333]/50 rounded-md">
+                          {log.entity_type === "client" && <Users className="w-3.5 h-3.5 text-[#D4A853]" />}
+                          {log.entity_type === "project" && <FolderKanban className="w-3.5 h-3.5 text-emerald-400" />}
+                          {log.entity_type === "document" && <FileText className="w-3.5 h-3.5 text-blue-400" />}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white font-medium drop-shadow-md">
-                            <span className="font-semibold text-[#D4A853] capitalize">{log.action}</span> {log.entity_type}
-                            {log.details?.name ? ` - ${log.details.name}` : ""}
-                            {log.details?.number ? ` - ${log.details.number}` : ""}
+                        <div>
+                          <p className="text-sm text-white font-medium">
+                            <span className="capitalize text-[#D4A853]">{log.action}</span> {log.entity_type} {log.details?.name ? `- ${log.details.name}` : ""}
                           </p>
-                          <p className="text-xs text-[#bbb] mt-1.5 flex items-center gap-2 drop-shadow-sm">
-                            <span>{new Date(log.created_at).toLocaleString()}</span>
-                            <span className="text-white/20">•</span>
-                            <span className="bg-black/40 backdrop-blur-sm px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-widest text-[#ccc]">
-                              {log.source}
-                            </span>
-                          </p>
+                          <p className="text-[10px] text-[#A3A3A3]">{new Date(log.created_at).toLocaleString()}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <span className="bg-black/40 px-2 py-0.5 rounded text-[9px] uppercase tracking-widest text-[#888] border border-[#333]">
+                        {log.source}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+
         </div>
 
-        {/* Right Column (Quick Actions, Resources, Services) */}
-        <div className="space-y-8">
-          
-          {/* ─── QUICK ACTIONS — Abstract waves bg ─── */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-[#D4A853]" /> Acciones Rápidas
-            </h2>
-            <div className="relative overflow-hidden rounded-xl border border-[#333]/80 shadow-lg hover-glow transition-all duration-300 group">
-              {/* BG Image */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: "url(/bg/actions-bg.jpg)" }}
-              />
-              <div className="absolute inset-0 bg-black/65 backdrop-blur-[2px]" />
-              
-              <div className="relative z-10 p-4 space-y-3.5">
-                <Link href="/clients" className="flex items-center justify-between p-3 rounded-xl bg-black/30 backdrop-blur-sm border border-white/5 hover:bg-black/50 hover:border-[#D4A853]/30 transition-all group/link">
-                  <span className="text-xs font-semibold text-white flex items-center gap-2 drop-shadow-md">
-                    <Users className="w-4 h-4 text-[#D4A853]" /> Registrar Cliente
-                  </span>
-                  <Plus className="w-4 h-4 text-[#888] group-hover/link:text-white transition-colors" />
-                </Link>
-                
-                <Link href="/projects" className="flex items-center justify-between p-3 rounded-xl bg-black/30 backdrop-blur-sm border border-white/5 hover:bg-black/50 hover:border-[#D4A853]/30 transition-all group/link">
-                  <span className="text-xs font-semibold text-white flex items-center gap-2 drop-shadow-md">
-                    <FolderKanban className="w-4 h-4 text-emerald-400" /> Crear Proyecto
-                  </span>
-                  <Plus className="w-4 h-4 text-[#888] group-hover/link:text-white transition-colors" />
-                </Link>
-
-                <Link href="/documents" className="flex items-center justify-between p-3 rounded-xl bg-black/30 backdrop-blur-sm border border-white/5 hover:bg-black/50 hover:border-[#D4A853]/30 transition-all group/link">
-                  <span className="text-xs font-semibold text-white flex items-center gap-2 drop-shadow-md">
-                    <FileText className="w-4 h-4 text-blue-400" /> Generar Documento
-                  </span>
-                  <Plus className="w-4 h-4 text-[#888] group-hover/link:text-white transition-colors" />
-                </Link>
-              </div>
+        {/* Lado Derecho: Gestión Técnica & Infraestructura (4 columnas) */}
+        <div className="xl:col-span-4 space-y-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <Server className="w-5 h-5 text-emerald-500" />
             </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Gestión Técnica</h2>
           </div>
 
-          {/* ─── SERVER RESOURCES — Colorful Serenity bg ─── */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Layers className="w-5 h-5 text-[#D4A853]" /> Recursos de Servidor
-            </h2>
-            <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg hover-glow transition-all duration-300 group">
-              {/* BG Image */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: "url(/bg/resources-bg.jpg)" }}
-              />
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-[3px]" />
+          {/* Quick Actions (Minimalist) */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/clients" className="flex flex-col items-center justify-center p-4 rounded-xl bg-[#1A1A1A]/60 border border-[#333] hover:bg-[#D4A853]/10 hover:border-[#D4A853]/40 transition-all group text-center gap-2">
+              <Users className="w-5 h-5 text-[#A3A3A3] group-hover:text-[#D4A853] transition-colors" />
+              <span className="text-xs font-semibold text-white">Nuevo Cliente</span>
+            </Link>
+            <Link href="/documents" className="flex flex-col items-center justify-center p-4 rounded-xl bg-[#1A1A1A]/60 border border-[#333] hover:bg-blue-500/10 hover:border-blue-500/40 transition-all group text-center gap-2">
+              <FileText className="w-5 h-5 text-[#A3A3A3] group-hover:text-blue-400 transition-colors" />
+              <span className="text-xs font-semibold text-white">Facturar</span>
+            </Link>
+          </div>
+
+          {/* Server Resources */}
+          <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg group">
+            <div 
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+              style={{ backgroundImage: "url(/bg/resources-bg.jpg)" }}
+            />
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-[4px]" />
+            
+            <div className="relative z-10 p-5 space-y-5">
+              <h3 className="text-sm font-bold text-white drop-shadow-lg flex items-center justify-between border-b border-white/10 pb-3">
+                <span className="flex items-center gap-2"><Cpu className="w-4 h-4 text-[#D4A853]" /> Servidor Ubuntu</span>
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              </h3>
               
-              <div className="relative z-10 p-5 space-y-5">
-                
-                {/* CPU Usage */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-[#c9c9c9] flex items-center gap-1.5 drop-shadow-md"><Cpu className="w-3.5 h-3.5" /> CPU (Server)</span>
-                    <span className="text-white drop-shadow-lg">{cpu}%</span>
-                  </div>
-                  <div className="h-2 w-full bg-black/40 backdrop-blur-sm rounded-full overflow-hidden border border-white/5">
-                    <div 
-                      className="h-full bg-gradient-to-r from-[#D4A853] to-amber-400 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(212,168,83,0.4)]" 
-                      style={{ width: `${cpu}%` }} 
-                    />
-                  </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#A3A3A3]">Uso CPU</span>
+                  <span className="text-white">{cpu}%</span>
                 </div>
-
-                {/* Memory Usage */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-[#c9c9c9] flex items-center gap-1.5 drop-shadow-md"><Database className="w-3.5 h-3.5" /> RAM (Asignada)</span>
-                    <span className="text-white drop-shadow-lg">{ram} GB / 8 GB</span>
-                  </div>
-                  <div className="h-2 w-full bg-black/40 backdrop-blur-sm rounded-full overflow-hidden border border-white/5">
-                    <div 
-                      className="h-full bg-gradient-to-r from-[#D4A853] to-[#e8c36a] transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(212,168,83,0.3)]" 
-                      style={{ width: `${(ram / 8) * 100}%` }} 
-                    />
-                  </div>
+                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                  <div className="h-full bg-[#D4A853]" style={{ width: `${cpu}%` }} />
                 </div>
+              </div>
 
-                {/* Network Usage */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-[#c9c9c9] flex items-center gap-1.5 drop-shadow-md"><Server className="w-3.5 h-3.5" /> Ancho de Banda</span>
-                    <span className="text-white drop-shadow-lg">{network} req/m</span>
-                  </div>
-                  <div className="h-2 w-full bg-black/40 backdrop-blur-sm rounded-full overflow-hidden border border-white/5">
-                    <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
-                      style={{ width: `${(network / 400) * 100}%` }} 
-                    />
-                  </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#A3A3A3]">Memoria RAM</span>
+                  <span className="text-white">{ram} GB / 8 GB</span>
+                </div>
+                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                  <div className="h-full bg-emerald-500" style={{ width: `${(ram / 8) * 100}%` }} />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ─── SERVICE STATUS — Japanese art bg ─── */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Server className="w-5 h-5 text-[#D4A853]" /> Estado de Servicios
-            </h2>
-            <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg group">
-              {/* BG Image */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: "url(/bg/services-bg.jpg)" }}
+          {/* Service Status */}
+          <div className="bg-[#1A1A1A]/40 backdrop-blur-sm rounded-xl border border-[#333] overflow-hidden">
+            <div className="p-4 border-b border-[#333]/50 bg-black/20">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Infraestructura & APIs
+              </h3>
+            </div>
+            <div className="p-2 space-y-1">
+              <ServiceStatus 
+                name="Base de Datos (Supabase)" 
+                status={health?.services?.supabase?.status} 
+                icon={Database} 
+                latency={health?.services?.supabase?.latency} 
               />
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
-
-              <div className="relative z-10 flex flex-col gap-3.5 p-4">
-                <ServiceStatus 
-                  name="Supabase Database" 
-                  status={health?.services?.supabase?.status} 
-                  icon={Database} 
-                  latency={health?.services?.supabase?.latency} 
-                />
-                <ServiceStatus 
-                  name="NextOS API" 
-                  status={health?.services?.api?.status} 
-                  icon={ActivitySquare} 
-                  latency={health?.services?.api?.latency} 
-                />
-                <ServiceStatus 
-                  name="Telegram Bot API" 
-                  status={health?.services?.telegram?.status} 
-                  icon={MessageSquare} 
-                />
-              </div>
+              <ServiceStatus 
+                name="NextOS API Core" 
+                status={health?.services?.api?.status} 
+                icon={ActivitySquare} 
+                latency={health?.services?.api?.latency} 
+              />
+              <ServiceStatus 
+                name="Telegram Webhooks" 
+                status={health?.services?.telegram?.status} 
+                icon={MessageSquare} 
+              />
             </div>
           </div>
 
@@ -429,19 +410,17 @@ function ServiceStatus({ name, status, icon: Icon, latency }: any) {
   const isUp = status === "up";
   
   return (
-    <div className="flex items-center justify-between p-3.5 rounded-xl bg-black/30 backdrop-blur-md border border-white/5 hover:border-[#D4A853]/20 transition-colors">
+    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-black/20 transition-colors">
       <div className="flex items-center gap-3">
-        <div className="p-1.5 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 text-[#c9c9c9]">
-          <Icon className="w-4 h-4" />
+        <div className="p-1.5 bg-[#333]/40 rounded-md border border-[#444]/50 text-[#A3A3A3]">
+          <Icon className="w-3.5 h-3.5" />
         </div>
         <div>
-          <p className="text-xs font-semibold text-white drop-shadow-md">{name}</p>
-          {latency !== undefined && <p className="text-[10px] text-[#bbb] mt-0.5 drop-shadow-sm">Latencia: {latency}ms</p>}
+          <p className="text-xs font-semibold text-white">{name}</p>
+          {latency !== undefined && <p className="text-[9px] text-[#888] mt-0.5">Latencia: {latency}ms</p>}
         </div>
       </div>
-      <Badge variant={isUp ? "success" : "danger"} className="text-[10px] py-0.5 px-2 rounded-full font-bold backdrop-blur-md shadow-md">
-        {isUp ? "Operativo" : "Error"}
-      </Badge>
+      <div className={`h-2 w-2 rounded-full ${isUp ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.5)]"}`} />
     </div>
   );
 }
