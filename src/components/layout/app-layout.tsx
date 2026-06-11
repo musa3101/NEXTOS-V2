@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { AnimatedBackground } from "./animated-background";
@@ -12,7 +11,6 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
