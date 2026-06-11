@@ -599,113 +599,17 @@
 .login-wrapper .card-switch {
   position: relative;
   width: 320px;
-  height: 460px; /* Switch (20px) + Gap (40px) + Card (380px) + Shadow margin (20px) = 460px */
+  height: 400px; /* Card (380px) + Shadow margin (20px) */
   display: flex;
-  justify-content: center;
-}
-
-/* switch card */
-.login-wrapper .switch {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 30px;
-  width: 50px;
-  height: 20px;
-  user-select: none;
-}
-
-.login-wrapper .card-side::before {
-  position: absolute;
-  content: 'Log in';
-  left: -70px;
-  top: 0;
-  width: 100px;
-  text-decoration: underline;
-  color: var(--font-color);
-  font-weight: 600;
-  text-align: right;
-  cursor: pointer;
-}
-
-.login-wrapper .card-side::after {
-  position: absolute;
-  content: 'Sign up';
-  left: 70px;
-  top: 0;
-  width: 100px;
-  text-decoration: none;
-  color: var(--font-color);
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-
-.login-wrapper .toggle {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.login-wrapper .slider {
-  box-sizing: border-box;
-  border-radius: 5px;
-  border: 2px solid var(--main-color);
-  box-shadow: 4px 4px var(--main-color);
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--bg-color);
-  transition: 0.3s;
-}
-
-.login-wrapper .slider:before {
-  box-sizing: border-box;
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  border: 2px solid var(--main-color);
-  border-radius: 5px;
-  left: -2px;
-  bottom: 2px;
-  background-color: var(--bg-color);
-  box-shadow: 0 3px 0 var(--main-color);
-  transition: 0.3s;
-}
-
-.login-wrapper .toggle:checked + .slider {
-  background-color: var(--bg-color-alt);
-}
-
-.login-wrapper .toggle:checked + .slider:before {
-  transform: translateX(30px);
-}
-
-.login-wrapper .toggle:checked ~ .card-side:before {
-  text-decoration: none;
-}
-
-.login-wrapper .toggle:checked ~ .card-side:after {
-  text-decoration: underline;
 }
 
 /* card */ 
 .login-wrapper .flip-card__inner {
   width: 320px;
   height: 380px;
-  position: absolute;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   flex-shrink: 0;
   background-color: transparent;
   perspective: 1000px;
@@ -714,23 +618,13 @@
   transform-style: preserve-3d;
 }
 
-.login-wrapper .toggle:checked ~ .flip-card__inner {
-  transform: translateX(-50%) rotateY(180deg);
-}
-
-.login-wrapper .toggle:checked ~ .flip-card__front {
-  box-shadow: none;
-}
-
-.login-wrapper .flip-card__front, .login-wrapper .flip-card__back {
+.login-wrapper .flip-card__front {
   padding: 30px 25px;
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
   background: rgba(22, 22, 22, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -738,10 +632,6 @@
   border-radius: 16px;
   border: 2px solid var(--main-color);
   box-shadow: 5px 5px 0px 0px var(--main-color), 0 0 30px rgba(212, 168, 83, 0.15);
-}
-
-.login-wrapper .flip-card__back {
-  transform: rotateY(180deg);
 }
 
 .login-wrapper .flip-card__form {
