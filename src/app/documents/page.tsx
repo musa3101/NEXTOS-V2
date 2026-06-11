@@ -62,92 +62,123 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Documentos Dinámicos</h1>
-          <p className="text-[#A3A3A3] text-sm">Facturas y entregas generadas en PDF.</p>
+      {/* ═══ HEADER with background image ═══ */}
+      <div className="relative overflow-hidden rounded-2xl border border-[#333]/50 group">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
+          style={{ backgroundImage: "url(/bg/services-bg.jpg)" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/45" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+        
+        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 md:p-8">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-2 w-2 rounded-full bg-[#D4A853] animate-ping" />
+              <span className="text-[10px] text-[#D4A853] font-bold uppercase tracking-widest drop-shadow-lg">Documentación</span>
+            </div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-xl">Documentos Dinámicos</h1>
+            <p className="text-[#d1d1d1] text-sm mt-0.5 drop-shadow-lg">Facturas y entregas generadas en PDF.</p>
+          </div>
+          <Button onClick={() => setIsCreateOpen(true)} className="bg-[#D4A853] hover:bg-[#c39742] active:scale-[0.98] text-black font-semibold shadow-lg shadow-[#D4A853]/10 hover:shadow-[#D4A853]/25 transition-all duration-300 rounded-xl cursor-pointer">
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Documento
+          </Button>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)} className="bg-[#D4A853] hover:bg-[#c39742] text-black font-semibold">
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Documento
-        </Button>
       </div>
 
-      <Card className="p-0 overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 flex justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-[#D4A853]" />
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead className="text-right">PDF</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {documents?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-[#A3A3A3]">
-                    No hay documentos generados.
-                  </TableCell>
+      {/* ═══ TABLE with background image ═══ */}
+      <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg hover-glow transition-all duration-300 group">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+          style={{ backgroundImage: "url(/bg/chart-bg.jpg)" }}
+        />
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
+        
+        <div className="relative z-10">
+          {isLoading ? (
+            <div className="p-12 flex justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-[#D4A853]" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader className="bg-black/20">
+                <TableRow className="border-b border-white/10 hover:bg-transparent">
+                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Número</TableHead>
+                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Tipo</TableHead>
+                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Cliente</TableHead>
+                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Fecha</TableHead>
+                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 text-right drop-shadow-md">PDF</TableHead>
                 </TableRow>
-              ) : (
-                documents?.map((doc: any) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-medium text-white">{doc.number}</TableCell>
-                    <TableCell>
-                      <Badge variant={doc.type === "invoice" ? "warning" : "info"}>
-                        {doc.type === "invoice" ? "Factura" : "Entrega"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{doc.clients?.name || "-"}</TableCell>
-                    <TableCell>{new Date(doc.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id, doc.number)}>
-                        <Download className="w-4 h-4 mr-2" /> Descargar
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {documents?.length === 0 ? (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={5} className="text-center py-8 text-[#c9c9c9] drop-shadow-md">
+                      No hay documentos generados.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
+                ) : (
+                  documents?.map((doc: any) => (
+                    <TableRow key={doc.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-300">
+                      <TableCell className="font-medium text-white drop-shadow-md">{doc.number}</TableCell>
+                      <TableCell>
+                        <Badge variant={doc.type === "invoice" ? "warning" : "info"} className="backdrop-blur-sm">
+                          {doc.type === "invoice" ? "Factura" : "Entrega"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[#ccc] drop-shadow-sm">{doc.clients?.name || "-"}</TableCell>
+                      <TableCell className="text-[#ccc] drop-shadow-sm">{new Date(doc.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id, doc.number)} className="bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white">
+                          <Download className="w-4 h-4 mr-2" /> Descargar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </div>
 
       {/* Slide-over or Modal Creator */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-[#1A1A1A] border border-[#333] w-full max-w-3xl rounded-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-[#333] flex justify-between items-center bg-[#111]/50">
-              <div>
-                <h2 className="text-xl font-bold text-white">Generar Nuevo Documento</h2>
-                <p className="text-sm text-[#A3A3A3]">Crea facturas o actas de entrega para tus clientes.</p>
+          <div className="relative overflow-hidden w-full max-w-3xl rounded-xl shadow-2xl flex flex-col max-h-[90vh] border border-[#333]">
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: "url(/bg/header-bg.jpg)" }}
+            />
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-[3px]" />
+            
+            <div className="relative z-10 flex flex-col max-h-[90vh]">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold text-white drop-shadow-lg">Generar Nuevo Documento</h2>
+                  <p className="text-sm text-[#bbb] drop-shadow-md">Crea facturas o actas de entrega para tus clientes.</p>
+                </div>
+                <button 
+                  onClick={() => setIsCreateOpen(false)} 
+                  className="text-[#A3A3A3] hover:text-white p-1 rounded-md hover:bg-white/10"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-              <button 
-                onClick={() => setIsCreateOpen(false)} 
-                className="text-[#A3A3A3] hover:text-white p-1 rounded-md hover:bg-[#262626]"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
 
-            {/* Modal Scrollable Form */}
-            <div className="p-6 overflow-y-auto flex-1 space-y-6">
-              <DocumentForm 
-                clients={clients || []} 
-                projects={projects || []} 
-                onSuccess={() => {
-                  setIsCreateOpen(false);
-                  queryClient.invalidateQueries({ queryKey: ["documents"] });
-                }} 
-              />
+              {/* Modal Scrollable Form */}
+              <div className="p-6 overflow-y-auto flex-1 space-y-6">
+                <DocumentForm 
+                  clients={clients || []} 
+                  projects={projects || []} 
+                  onSuccess={() => {
+                    setIsCreateOpen(false);
+                    queryClient.invalidateQueries({ queryKey: ["documents"] });
+                  }} 
+                />
+              </div>
             </div>
           </div>
         </div>
