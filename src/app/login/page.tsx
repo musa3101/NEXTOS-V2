@@ -41,11 +41,11 @@ export default function LoginPage() {
     <div className="relative w-screen h-screen flex flex-col items-center justify-center bg-[#0c0c0e] overflow-hidden select-none">
       {/* Dynamic Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-50 scale-105 filter blur-sm"
+        className="absolute inset-0 bg-cover bg-center opacity-90 scale-105 filter blur-[2px]"
         style={{ backgroundImage: "url(/bg/hero-login.jpg)" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-black/80 to-[#0c0c0e]/95" />
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-15 mix-blend-overlay" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e]/80 via-black/40 to-[#0c0c0e]/60" />
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
 
       {/* Main Container */}
       <div className="relative z-10 flex flex-col items-center space-y-8 animate-in fade-in zoom-in duration-500">
