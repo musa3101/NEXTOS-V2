@@ -80,7 +80,16 @@
 
 /* Custom premium hover effect */
 .hover-glow:hover {
-  box-shadow: 0 0 15px rgba(212, 168, 83, 0.15);
-  border-color: rgba(212, 168, 83, 0.3);
+  box-shadow: 0 0 20px rgba(212, 168, 83, 0.18), 0 0 40px rgba(212, 168, 83, 0.06);
+  border-color: rgba(212, 168, 83, 0.35);
+}
+
+/* Smooth image zoom on card hover */
+.group:hover .group-hover\:scale-105 {
+  transform: scale(1.05);
+}
+
+.group:hover .group-hover\:scale-110 {
+  transform: scale(1.1);
 }
 
