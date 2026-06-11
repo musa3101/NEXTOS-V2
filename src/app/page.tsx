@@ -412,7 +412,7 @@ export default function Dashboard() {
                 latency={health?.services?.supabase?.latency} 
               />
               <ServiceStatus 
-                name="NextOS API Core" 
+                name="Next LaB API Core" 
                 status={health?.services?.api?.status} 
                 icon={ActivitySquare} 
                 latency={health?.services?.api?.latency} 

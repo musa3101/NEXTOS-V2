@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NextOS | MyNext Internal OS",
+  title: "Next LaB | MyNext Internal OS",
   description: "Internal operating system for MyNext",
 };
 

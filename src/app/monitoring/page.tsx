@@ -64,7 +64,7 @@ export default function MonitoringPage() {
           bgImage={BG_IMAGES[0]}
         />
         <MonitorCard 
-          title="API Interna (NextOS)" 
+          title="API Interna (Next LaB)" 
           description="Endpoints de lógica de negocio"
           status={health?.services?.api?.status}
           latency={health?.services?.api?.latency}

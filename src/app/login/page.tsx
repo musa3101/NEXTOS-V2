@@ -38,17 +38,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative w-screen h-screen flex flex-col items-center justify-center bg-[#0c0c0e] overflow-hidden select-none">
-      {/* Dynamic Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-90 scale-105 filter blur-[2px]"
-        style={{ backgroundImage: "url(/bg/hero-login.jpg)" }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e]/80 via-black/40 to-[#0c0c0e]/60" />
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
-
-      {/* Main Container */}
-      <div className="relative z-10 flex flex-col items-center space-y-8 animate-in fade-in zoom-in duration-500">
+    <div className="relative w-screen h-screen flex flex-col lg:flex-row bg-[#0c0c0e] overflow-hidden select-none">
+      
+      {/* Left Side: Login Section */}
+      <div className="relative z-20 w-full lg:w-[45%] xl:w-[40%] h-full flex flex-col items-center justify-center bg-[#0c0c0e] shadow-[20px_0_50px_rgba(0,0,0,0.8)] border-r border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0c0e] via-[#121216] to-[#0c0c0e]" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
+        
+        <div className="relative z-10 flex flex-col items-center space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
         
         {/* Header Seal */}
         <div className="flex flex-col items-center space-y-4">
@@ -61,8 +58,8 @@ export default function LoginPage() {
             />
           </div>
           <div className="text-center flex flex-col items-center">
-            <h1 className="text-2xl font-bold tracking-[0.25em] text-white uppercase flex items-center justify-center gap-1.5 drop-shadow-md">
-              MY<span className="text-[#D4A853]">NEXT</span> <span className="font-light text-neutral-400">OS</span>
+            <h1 className="text-2xl font-bold tracking-[0.25em] text-white flex items-center justify-center gap-1.5 drop-shadow-md">
+              Next <span className="text-[#D4A853]">LaB</span>
             </h1>
             <div className="mt-2 flex flex-col items-center space-y-1">
               <p className="text-[10px] text-[#D4A853] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-1">
@@ -120,8 +117,20 @@ export default function LoginPage() {
               </div>
           </div>
         </div>
-
       </div>
+      </div>
+
+      {/* Right Side: Hero Background Image */}
+      <div className="hidden lg:block relative flex-1 h-full bg-[#0c0c0e] overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-100 transition-transform duration-[20000ms] ease-out hover:scale-105"
+          style={{ backgroundImage: "url(/bg/hero-login.jpg)" }}
+        />
+        {/* Gradients to blend smoothly with the left panel and add a premium dark vignette */}
+        <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#0c0c0e] to-transparent opacity-90 w-32 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e]/80 via-transparent to-[#0c0c0e]/40 pointer-events-none z-10" />
+      </div>
+
     </div>
   );
 }

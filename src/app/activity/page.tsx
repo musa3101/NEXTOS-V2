@@ -33,7 +33,7 @@ export default function ActivityPage() {
             <span className="text-[10px] text-[#D4A853] font-bold uppercase tracking-widest drop-shadow-lg">Registro del Sistema</span>
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-xl">Historial de Actividad</h1>
-          <p className="text-[#d1d1d1] text-sm mt-0.5 drop-shadow-lg">Registro completo de eventos del sistema NextOS.</p>
+          <p className="text-[#d1d1d1] text-sm mt-0.5 drop-shadow-lg">Registro completo de eventos del sistema Next LaB.</p>
         </div>
       </div>
 
