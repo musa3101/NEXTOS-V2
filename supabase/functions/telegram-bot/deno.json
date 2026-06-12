@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "https://esm.sh/v135/": "https://esm.sh/v135/",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.45.4"
+  }
+}

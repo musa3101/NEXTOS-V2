@@ -6,8 +6,8 @@ export async function GET(request: Request) {
   const host = request.headers.get("host");
   const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   
-  // Or override with query param ?url=https://...
-  const webhookUrl = searchParams.get("url") || `${protocol}://${host}/api/telegram/webhook`;
+  // Use edge function URL if provided, otherwise fallback to local
+  const webhookUrl = searchParams.get("url") || process.env.SUPABASE_EDGE_FUNCTION_URL || `${protocol}://${host}/api/telegram/webhook`;
 
   if (!process.env.TELEGRAM_BOT_TOKEN) {
     return NextResponse.json({ error: "TELEGRAM_BOT_TOKEN is not set" }, { status: 500 });
