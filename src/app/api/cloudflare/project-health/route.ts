@@ -40,24 +40,43 @@ export async function GET(request: Request) {
 
     if (projectName && token && accountId) {
       try {
-        const cfRes = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const [cfRes, deployRes] = await Promise.all([
+          fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
+          fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments?per_page=1`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
+        ]);
+
         if (cfRes.ok) {
           const cfJson = await cfRes.json();
           const p = cfJson.result;
+          let totalDeployments = 1;
+          if (deployRes.ok) {
+            const deployJson = await deployRes.json();
+            totalDeployments = deployJson.result_info?.total_count || deployJson.result?.length || 1;
+          }
+
           if (p) {
             cfDetails = {
               subdomain: p.subdomain,
               domainsCount: p.domains?.length || 1,
               createdOn: p.created_on,
               productionBranch: p.production_branch || "main",
+              totalDeployments,
               lastDeployTime: p.latest_deployment?.created_on || null,
               lastDeployStatus: p.latest_deployment?.latest_stage?.status || "success",
               commitHash: p.latest_deployment?.deployment_trigger?.metadata?.commit_hash || null,

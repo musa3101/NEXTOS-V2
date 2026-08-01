@@ -236,9 +236,12 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
 
         {/* SECTION 3: INFORMACIÓN DE DESPLIEGUE & VISIT WEB */}
         <div className="pt-3 border-t border-[#333]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-[#888] space-y-0.5 text-center sm:text-left">
+          <div className="text-xs text-[#888] space-y-1 text-center sm:text-left">
             <p>Creado en Cloudflare: <span className="text-white font-medium">{health?.cfDetails?.createdOn ? new Date(health.cfDetails.createdOn).toLocaleDateString("es-ES", { month: "short", day: "numeric", year: "numeric" }) : createdDate}</span></p>
-            <p>Último Despliegue: <span className="text-white font-medium">{health?.cfDetails?.lastDeployTime ? new Date(health.cfDetails.lastDeployTime).toLocaleString("es-ES") : "En línea"}</span></p>
+            <p>Historial de Despliegues: <span className="text-emerald-400 font-bold">{health?.cfDetails?.totalDeployments ? `${health.cfDetails.totalDeployments} despliegues en producción` : "En línea"}</span></p>
+            {health?.cfDetails?.commitMessage && (
+              <p className="truncate max-w-xs text-[#aaa]">Último commit: <span className="text-white italic">"{health.cfDetails.commitMessage}"</span></p>
+            )}
             <p>Rama & Commit: <span className="font-mono text-[#D4A853]">{health?.cfDetails?.productionBranch || project?.production_branch || "main"} {health?.cfDetails?.commitHash ? `(${health.cfDetails.commitHash.substring(0, 7)})` : ""}</span></p>
           </div>
 
