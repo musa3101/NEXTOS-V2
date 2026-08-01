@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     withTimeout(validateCloudflareConnection()),
   ]);
 
-  if (sbResult.status === "fulfilled" && !sbResult.value?.error) {
+  if (sbResult.status === "fulfilled" && (!sbResult.value?.error || sbResult.value?.error?.code === "PGRST205")) {
     supabaseStatus = "up";
     supabaseLatency = Date.now() - start;
   }
