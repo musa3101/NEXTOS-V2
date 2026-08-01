@@ -1,44 +1,30 @@
-import React, { useId } from "react";
+import React from "react";
+import { Loader2 } from "lucide-react";
 
 interface LoaderProps {
   className?: string;
-  size?: number; // scale multiplier, default is 1 (100px x 100px)
+  size?: number; // scale multiplier, default is 1
 }
 
 export function Loader({ className, size = 1 }: LoaderProps) {
-  const id = useId();
-  const maskId = `clipping-${id.replace(/:/g, "")}`;
+  const pixelSize = Math.round(48 * size);
 
   return (
     <div 
       className={`relative flex items-center justify-center select-none ${className || ""}`}
-      style={{ 
-        width: `${100 * size}px`, 
-        height: `${100 * size}px`,
-        transform: `scale(${size})`
-      }}
     >
-      <div className="uiverse-loader">
-        <svg width="100" height="100" viewBox="0 0 100 100" className="absolute top-0 left-0 pointer-events-none">
-          <defs>
-            <mask id={maskId}>
-              <polygon points="0,0 100,0 100,100 0,100" fill="black"></polygon>
-              <polygon points="25,25 75,25 50,75" fill="white"></polygon>
-              <polygon points="50,25 75,75 25,75" fill="white"></polygon>
-              <polygon points="35,35 65,35 50,65" fill="white"></polygon>
-              <polygon points="35,35 65,35 50,65" fill="white"></polygon>
-              <polygon points="35,35 65,35 50,65" fill="white"></polygon>
-              <polygon points="35,35 65,35 50,65" fill="white"></polygon>
-            </mask>
-          </defs>
-        </svg>
+      <div className="relative flex items-center justify-center">
+        {/* Glow backdrop ring */}
         <div 
-          className="box" 
-          style={{ 
-            mask: `url(#${maskId})`, 
-            WebkitMask: `url(#${maskId})` 
-          }}
-        ></div>
+          className="absolute rounded-full bg-[#D4A853]/20 blur-md animate-pulse"
+          style={{ width: `${pixelSize * 1.4}px`, height: `${pixelSize * 1.4}px` }}
+        />
+        
+        {/* Hardware-accelerated smooth spinner */}
+        <Loader2 
+          className="animate-spin text-[#D4A853] relative z-10" 
+          style={{ width: `${pixelSize}px`, height: `${pixelSize}px` }}
+        />
       </div>
     </div>
   );

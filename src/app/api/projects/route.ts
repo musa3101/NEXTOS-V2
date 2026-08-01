@@ -7,12 +7,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const clientId = searchParams.get("clientId");
 
-  // Trigger background Cloudflare projects & client sync
-  try {
-    await syncCloudflareProjectsToClients();
-  } catch (syncErr: any) {
-    console.error("[GET Projects] Background cloudflare sync failed:", syncErr.message);
-  }
+
 
   let query = supabaseAdmin
     .from("projects")

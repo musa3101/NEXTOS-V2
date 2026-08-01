@@ -22,7 +22,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (isApiAuth || isApiTelegram || isApiHealth) {
+  const isApiCloudflare = pathname.startsWith('/api/cloudflare');
+
+  if (isApiAuth || isApiTelegram || isApiHealth || isApiCloudflare) {
     return NextResponse.next();
   }
 

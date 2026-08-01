@@ -29,7 +29,12 @@ import {
 import { Loader } from "@/components/ui/loader";
 
 
+import { getPrimaryProjectUrl } from "@/lib/cloudflare";
+import { ProjectDetailModal } from "@/components/dashboard/project-detail-modal";
+
 export default function Dashboard() {
+  const [selectedProject, setSelectedProject] = useState<any>(null);
+
   // Queries
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboard-stats"],
@@ -73,64 +78,72 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const portfolioProjects = [
-    { name: "Blessed Barber Studio", url: "blessedbarber.es", status: "production", type: "Web & Reserva" },
-    { name: "Bar Cafetería Luna Llena", url: "lunallena.com", status: "production", type: "Web & Menú Digital" },
-    { name: "Ecuaplac", url: "ecuaplac.es", status: "production", type: "Corporate Web" },
-    { name: "RBARI RESTAURANT", url: "rbari.com", status: "development", type: "Web & Menú" },
-    { name: "NEXT ERA", url: "nextera.dev", status: "maintenance", type: "E-commerce" }
-  ];
+  // Fetch Cloudflare real projects
+  const { data: cfData, isLoading: cfLoading, refetch: refetchCf } = useQuery({
+    queryKey: ["cloudflare-projects"],
+    queryFn: async () => {
+      const res = await fetch("/api/cloudflare/projects");
+      if (!res.ok) throw new Error("Failed to fetch Cloudflare projects");
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+
+  const cfProjects = cfData?.data || [];
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-10">
+    <div className="space-y-8 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-12">
       
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* HERO SECTION — Branding MYNEXT                              */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-3xl border border-[#D4A853]/20 shadow-2xl group">
+      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-[#D4A853]/25 shadow-2xl group">
         {/* BG Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
           style={{ backgroundImage: "url(/bg/header-bg.jpg)" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/50" />
         
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 md:p-12">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="relative flex h-3 w-3">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 sm:p-8 md:p-12">
+          <div className="space-y-3 max-w-2xl">
+            {/* gpt-taste Eyebrow */}
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A853] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#D4A853]"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#D4A853]"></span>
               </span>
-              <span className="text-xs text-[#D4A853] font-bold uppercase tracking-[0.2em] drop-shadow-lg">
-                Arquitectura Digital Premium
+              <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#D4A853] drop-shadow">
+                Ecosistema Digital Musa
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter drop-shadow-2xl">
+
+            {/* gpt-taste Main Title */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter drop-shadow-2xl leading-none">
               MYNEXT <span className="font-light text-[#A3A3A3]">COMMAND CENTER</span>
             </h1>
-            <p className="text-[#d1d1d1] text-lg max-w-xl font-medium drop-shadow-lg leading-relaxed">
-              Control centralizado para el imperio digital de Musa. Monitorización en tiempo real, infraestructura y gestión de clientes.
+
+            <p className="text-[#d1d1d1] text-sm sm:text-base md:text-lg font-medium drop-shadow-lg leading-relaxed max-w-prose">
+              Panel de control operativo en tiempo real. Monitorización de servidores, clientes e infraestructura de Cloudflare.
             </p>
           </div>
           
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-row md:flex-col gap-3 shrink-0">
             <a 
               href="https://mynextbymusa.com/" 
               target="_blank"
               rel="noreferrer"
-              className="uiverse-btn-gold px-6 py-4 group/btn"
+              className="uiverse-btn-gold px-5 py-3.5 sm:px-6 sm:py-4 group/btn w-full sm:w-auto"
             >
               <div className="relative z-10 flex items-center gap-3">
                 <div className="p-2 bg-[#D4A853]/20 rounded-lg">
                   <Globe className="w-5 h-5 text-[#D4A853]" />
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-[10px] text-[#A3A3A3] font-bold uppercase tracking-widest">Portal Público</span>
-                  <span className="text-sm font-semibold group-hover/btn:text-[#D4A853] transition-colors">mynextbymusa.com</span>
+                  <span className="text-[9px] text-[#A3A3A3] font-bold uppercase tracking-widest">Web Oficial</span>
+                  <span className="text-xs sm:text-sm font-semibold group-hover/btn:text-[#D4A853] transition-colors">mynextbymusa.com</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[#A3A3A3] ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                <ExternalLink className="w-4 h-4 text-[#A3A3A3] ml-1 group-hover/btn:translate-x-1 transition-transform" />
               </div>
             </a>
           </div>
@@ -138,72 +151,126 @@ export default function Dashboard() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* SECTION 1: PORTFOLIO & OPERACIONES                          */}
+      {/* SECTION 1: PROYECTOS CLOUDFLARE PAGES & EDGE NETWORK       */}
       {/* ═══════════════════════════════════════════════════════════ */}
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#D4A853]/10 rounded-lg border border-[#D4A853]/20">
-            <Code className="w-5 h-5 text-[#D4A853]" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#F38020]/10 rounded-xl border border-[#F38020]/30 shadow-[0_0_15px_rgba(243,128,32,0.15)]">
+              <Zap className="w-5 h-5 text-[#F38020]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Cloudflare Pages & Dominio Real</h2>
+                <Badge variant="warning" className="border-[#F38020]/40 text-[#F38020] bg-[#F38020]/10 text-[10px] uppercase font-bold tracking-widest">
+                  Live Sync
+                </Badge>
+              </div>
+              <p className="text-xs text-[#A3A3A3] mt-0.5">Sincronizados en tiempo real con tu cuenta oficial ({cfProjects.length} webs activas).</p>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Portfolio & Proyectos Activos</h2>
+
+          <button 
+            onClick={() => refetchCf()} 
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1A1A1A] hover:bg-[#262626] border border-[#333] active:scale-95 text-xs text-[#ccc] hover:text-white transition-all w-fit cursor-pointer"
+          >
+            <Activity className="w-3.5 h-3.5 text-[#F38020]" />
+            Refrescar Cloudflare
+          </button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {portfolioProjects.map((project, idx) => {
-            const beamClass = 
-              project.status === "production" 
-                ? "uiverse-card-beam-emerald" 
-                : project.status === "development" 
-                ? "uiverse-card-beam-gold" 
-                : "uiverse-card-beam-amber";
+        {cfLoading ? (
+          <div className="p-12 flex flex-col items-center justify-center bg-[#141419]/60 rounded-2xl border border-[#333]/50 backdrop-blur-md">
+            <Loader size={1} />
+            <p className="text-xs text-[#A3A3A3] mt-4 font-mono">Conectando con Cloudflare API...</p>
+          </div>
+        ) : cfProjects.length === 0 ? (
+          <div className="p-8 text-center bg-[#141419]/60 rounded-2xl border border-[#333]">
+            <p className="text-sm text-[#ccc]">No se encontraron proyectos en la cuenta de Cloudflare.</p>
+          </div>
+        ) : (
+          /* Bento Grid layout for projects */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {cfProjects.map((project: any, idx: number) => {
+              const { url, displayDomain, isCustom } = getPrimaryProjectUrl(project);
+              const createdDate = project.created_on ? new Date(project.created_on).toLocaleDateString("es-ES", { month: "short", day: "numeric", year: "numeric" }) : null;
+              
+              return (
+                <div 
+                  key={project.id || idx} 
+                  onClick={() => setSelectedProject(project)}
+                  className={`group relative overflow-hidden rounded-2xl border cursor-pointer ${
+                    isCustom 
+                      ? "border-[#D4A853]/40 bg-[#171510]/80 shadow-[0_0_20px_rgba(212,168,83,0.12)]" 
+                      : "border-[#333]/80 bg-[#121217]/80 hover:border-[#D4A853]/30"
+                  } backdrop-blur-md transition-all duration-300 hover:scale-[1.015] active:scale-95 flex flex-col justify-between p-5 min-h-[175px]`}
+                >
+                  {/* Subtle hover gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4A853]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            return (
-              <div key={idx} className={`group uiverse-card-beam ${beamClass} transition-all duration-300`}>
-                <div className="relative z-10 p-5 h-full flex flex-col justify-between min-h-[160px]">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <Badge 
-                        variant={project.status === "production" ? "success" : project.status === "development" ? "info" : "warning"}
-                        className="backdrop-blur-md shadow-[0_0_10px_rgba(255,255,255,0.02)]"
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {isCustom ? (
+                          <Badge className="bg-[#D4A853]/15 text-[#D4A853] border border-[#D4A853]/40 text-[9px] uppercase font-bold tracking-wider">
+                            Dominio Custom
+                          </Badge>
+                        ) : (
+                          <Badge variant="success" className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] uppercase">
+                            Producción
+                          </Badge>
+                        )}
+                        {project.production_branch && (
+                          <span className="text-[9px] font-mono text-[#888] bg-black/50 px-2 py-0.5 rounded border border-[#333]">
+                            {project.production_branch}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <a 
+                        href={url} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="p-2 rounded-xl bg-black/40 text-[#A3A3A3] hover:text-[#D4A853] hover:bg-[#D4A853]/10 border border-[#333] transition-all relative z-20 shrink-0"
+                        title={`Visitar ${displayDomain}`}
                       >
-                        {project.status === "production" ? "Producción" : project.status === "development" ? "En Desarrollo" : "Mantenimiento"}
-                      </Badge>
-                      <a href={`https://${project.url}`} target="_blank" rel="noreferrer" className="text-[#A3A3A3] hover:text-[#D4A853] transition-colors p-1 relative z-20">
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     </div>
-                    <h3 className="text-lg font-bold text-white drop-shadow-md">{project.name}</h3>
-                    <p className="text-xs text-[#888] font-mono mt-1">{project.url}</p>
+                    
+                    <h3 className="text-lg font-bold text-white tracking-tight drop-shadow-md group-hover:text-[#D4A853] transition-colors">
+                      {project.name}
+                    </h3>
+                    
+                    <p className={`text-xs font-mono mt-1 truncate ${isCustom ? "text-[#D4A853] font-semibold" : "text-[#999]"}`}>
+                      {displayDomain}
+                    </p>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-[#333]/40 flex items-center justify-between">
-                    <span className="text-xs text-[#A3A3A3] flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-[#555]" /> {project.type}</span>
-                    <span className="flex h-2.5 w-2.5 relative">
-                      {project.status === "production" ? (
-                        <>
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 pulse-radar-emerald"></span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500 pulse-radar-amber"></span>
-                        </>
-                      )}
+
+                  <div className="relative z-10 mt-5 pt-3 border-t border-[#333]/50 flex items-center justify-between">
+                    <span className="text-[11px] text-[#A3A3A3] flex items-center gap-1.5 font-medium">
+                      <Globe className="w-3.5 h-3.5 text-[#F38020]" />
+                      {createdDate ? `Creado: ${createdDate}` : "Cloudflare Edge"}
+                    </span>
+
+                    <span className="flex h-2.5 w-2.5 relative" title="Estado activo en la red Cloudflare">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 pulse-radar-emerald"></span>
                     </span>
                   </div>
                 </div>
+              );
+            })}
+
+            {/* Quick Add Project Card */}
+            <Link href="/projects" className="group uiverse-dashed-card flex flex-col items-center justify-center p-6 min-h-[175px] rounded-2xl active:scale-95 transition-transform">
+              <div className="w-12 h-12 rounded-full bg-[#333]/60 group-hover:bg-[#D4A853]/20 flex items-center justify-center mb-3 transition-all duration-300 shadow-[inset_0_0_8px_rgba(0,0,0,0.4)]">
+                <Plus className="w-6 h-6 text-[#A3A3A3] group-hover:text-[#D4A853] transition-colors" />
               </div>
-            );
-          })}
-          
-          {/* Quick Add Project Card */}
-          <Link href="/projects" className="group uiverse-dashed-card flex flex-col items-center justify-center p-8 min-h-[160px]">
-            <div className="w-12 h-12 rounded-full bg-[#333]/60 group-hover:bg-[#D4A853]/20 flex items-center justify-center mb-3 transition-all duration-300 shadow-[inset_0_0_8px_rgba(0,0,0,0.4)]">
-              <Plus className="w-6 h-6 text-[#A3A3A3] group-hover:text-[#D4A853] transition-colors" />
-            </div>
-            <span className="text-sm font-semibold text-[#A3A3A3] group-hover:text-white transition-colors">Añadir Nuevo Proyecto</span>
-          </Link>
-        </div>
+              <span className="text-xs sm:text-sm font-semibold text-[#A3A3A3] group-hover:text-white transition-colors">Gestionar en NextOS</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       <hr className="border-[#333]/50" />
@@ -427,6 +494,13 @@ export default function Dashboard() {
 
         </div>
       </div>
+
+      {selectedProject && (
+        <ProjectDetailModal 
+          project={selectedProject} 
+          onClose={() => setSelectedProject(null)} 
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
@@ -9,9 +8,25 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0c0c0e",
+};
+
 export const metadata: Metadata = {
-  title: "Next LaB | MyNext Internal OS",
-  description: "Internal operating system for MyNext",
+  title: "Next LaB | MyNext Command Center",
+  description: "Sistema operativo interno y control centralizado para MyNext",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "NEXTOS",
+  },
 };
 
 export default function RootLayout({
