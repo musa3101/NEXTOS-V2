@@ -3,10 +3,14 @@
 ## 📅 Fecha: 2026-08-01
 
 ### 🛠️ Lo realizado hoy:
-- **Mejoras en la Paleta / Modal de Proyecto (`ProjectDetailModal`)**:
-  1. **Navegación Móvil & Botón de Volver**: Añadidos botones prominentes de **`← Volver a Proyectos`** en la parte superior e inferior del modal para que en iPhone se pueda cerrar/volver atrás con un solo toque sin desplazarse.
-  2. **Métricas de Visitantes & Tráfico**: Añadido bloque visual con estadísticas de **Visitantes Únicos (~420/mes)**, **Vistas de Página (~1,850/mes)**, **Tiempo Medio de Sesión (1m 45s)** y **Tendencia (+16.4%)**, además de los accesos directos a Microsoft Clarity y Cloudflare.
-- **Despliegue**: Cambios validados y subidos a la rama `main` de GitHub (`origin/main`).
+- **Actualización de Métricas Reales de Microsoft Clarity**:
+  - Reemplazadas todas las cifras aproximadas/ficticias por el bloque de métricas **reales** registradas en Microsoft Clarity:
+    - 👥 **Sesiones Totales**: `999` (Excluidas 360 sesiones de bots).
+    - 👤 **Usuarios Únicos**: `996` (99.7% usuarios nuevos).
+    - 📜 **Profundidad de Desplazamiento**: `68.5%` promedio.
+    - ⏱️ **Tiempo Activo Empleado**: `1.0 min` promedio en sitio.
+  - Enlaces directos a las **Grabaciones & Mapa de Calor en Clarity** y **Panel de Analítica Cloudflare**.
+- **Despliegue**: Cambios validados y subidos a la rama `main` en GitHub (`origin/main`).
 
 ### 📁 Archivos modificados:
 - `src/components/dashboard/project-detail-modal.tsx`
