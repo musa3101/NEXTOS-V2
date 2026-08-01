@@ -32,6 +32,44 @@ export async function GET(request: Request) {
     const contentType = res.headers.get("content-type") || "text/html";
     const cfRay = res.headers.get("cf-ray") || null;
 
+    // Fetch Cloudflare Pages real project metadata if name is provided
+    let cfDetails: any = null;
+    const projectName = searchParams.get("name");
+    const token = process.env.CLOUDFLARE_API_TOKEN;
+    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+
+    if (projectName && token && accountId) {
+      try {
+        const cfRes = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (cfRes.ok) {
+          const cfJson = await cfRes.json();
+          const p = cfJson.result;
+          if (p) {
+            cfDetails = {
+              subdomain: p.subdomain,
+              domainsCount: p.domains?.length || 1,
+              createdOn: p.created_on,
+              productionBranch: p.production_branch || "main",
+              lastDeployTime: p.latest_deployment?.created_on || null,
+              lastDeployStatus: p.latest_deployment?.latest_stage?.status || "success",
+              commitHash: p.latest_deployment?.deployment_trigger?.metadata?.commit_hash || null,
+              commitMessage: p.latest_deployment?.deployment_trigger?.metadata?.commit_message || null,
+            };
+          }
+        }
+      } catch (cfErr) {
+        console.error("Cloudflare project details error:", cfErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       url: targetUrl,
@@ -43,6 +81,7 @@ export async function GET(request: Request) {
       server: serverHeader,
       contentType,
       cfRay,
+      cfDetails,
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {

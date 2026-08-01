@@ -39,7 +39,7 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
   const checkHealth = async () => {
     setHealthLoading(true);
     try {
-      const res = await fetch(`/api/cloudflare/project-health?url=${encodeURIComponent(url)}`);
+      const res = await fetch(`/api/cloudflare/project-health?url=${encodeURIComponent(url)}&name=${encodeURIComponent(project?.name || "")}`);
       const data = await res.json();
       setHealth(data);
     } catch (err) {
@@ -237,8 +237,9 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
         {/* SECTION 3: INFORMACIÓN DE DESPLIEGUE & VISIT WEB */}
         <div className="pt-3 border-t border-[#333]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-[#888] space-y-0.5 text-center sm:text-left">
-            <p>Creado en Cloudflare: <span className="text-white font-medium">{createdDate}</span></p>
-            <p>Rama de código: <span className="text-mono text-[#D4A853]">{project?.production_branch || "main"}</span></p>
+            <p>Creado en Cloudflare: <span className="text-white font-medium">{health?.cfDetails?.createdOn ? new Date(health.cfDetails.createdOn).toLocaleDateString("es-ES", { month: "short", day: "numeric", year: "numeric" }) : createdDate}</span></p>
+            <p>Último Despliegue: <span className="text-white font-medium">{health?.cfDetails?.lastDeployTime ? new Date(health.cfDetails.lastDeployTime).toLocaleString("es-ES") : "En línea"}</span></p>
+            <p>Rama & Commit: <span className="font-mono text-[#D4A853]">{health?.cfDetails?.productionBranch || project?.production_branch || "main"} {health?.cfDetails?.commitHash ? `(${health.cfDetails.commitHash.substring(0, 7)})` : ""}</span></p>
           </div>
 
           <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
