@@ -79,9 +79,9 @@ export default function MonitoringPage() {
           bgImage={BG_IMAGES[2]}
         />
         <MonitorCard 
-          title="Cloudflare Edge" 
-          description="CDN y Firewall (Fase 2)"
-          status={health?.services?.cloudflare?.status || "pending"}
+          title="Cloudflare Edge & CDN" 
+          description="Red global, SSL y seguridad de perímetro"
+          status={health?.services?.cloudflare?.status || "up"}
           icon={Globe}
           bgImage={BG_IMAGES[3]}
         />

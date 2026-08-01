@@ -22,7 +22,7 @@ import { Loader } from "@/components/ui/loader";
 
 export default function ClientsPage() {
   const [search, setSearch] = useState("");
-  const [onlyCloudflare, setOnlyCloudflare] = useState(true);
+  const [onlyCloudflare, setOnlyCloudflare] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const queryClient = useQueryClient();
 

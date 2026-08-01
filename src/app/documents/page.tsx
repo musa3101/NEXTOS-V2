@@ -88,6 +88,36 @@ export default function DocumentsPage() {
         </div>
       </div>
 
+      {/* ═══ STATS SUMMARY GRID ═══ */}
+      {(() => {
+        const totalInvoiced = (documents || [])
+          .filter((d: any) => d.type === "invoice" && d.total_amount)
+          .reduce((sum: number, d: any) => sum + Number(d.total_amount || 0), 0);
+        const invoiceCount = (documents || []).filter((d: any) => d.type === "invoice").length;
+        const deliveryCount = (documents || []).filter((d: any) => d.type === "delivery").length;
+
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-5 rounded-2xl bg-[#141419]/80 border border-[#333]/80 backdrop-blur-md flex flex-col justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#A3A3A3]">Total Documentos</span>
+              <p className="text-2xl font-black text-white mt-2">{isLoading ? "-" : (documents || []).length}</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-[#141419]/80 border border-[#D4A853]/30 backdrop-blur-md flex flex-col justify-between shadow-[0_0_15px_rgba(212,168,83,0.08)]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4A853]">Total Facturado</span>
+              <p className="text-2xl font-black text-[#D4A853] mt-2">{isLoading ? "-" : `€${totalInvoiced.toFixed(2)}`}</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-[#141419]/80 border border-[#333]/80 backdrop-blur-md flex flex-col justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#A3A3A3]">Facturas vs Entregas</span>
+              <p className="text-sm font-bold text-white mt-2 flex items-center gap-2">
+                <span className="text-[#D4A853]">{invoiceCount} Facturas</span>
+                <span className="text-[#666]">|</span>
+                <span className="text-blue-400">{deliveryCount} Entregas</span>
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ═══ TABLE with background image ═══ */}
       <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg hover-glow transition-all duration-300 group">
         <div 
