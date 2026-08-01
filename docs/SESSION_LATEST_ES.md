@@ -2,26 +2,41 @@
 
 ## 📅 Fecha: 2026-08-01
 
-### 🛠️ Lo realizado hoy (Rama `dev` local):
-- **Rediseño Completo de Plantillas PDF según Diseños Oficiales**:
-  1. **Plantilla de Facturas (`InvoiceTemplate`)**:
-     - Réplica exacta de `ECUAPLAC-FACTURA.pdf`.
-     - Fondo marfil cálido (`#FAF8F5`), titular `FACTURA` con píldora de número (`Nº: 03`).
-     - Insignia superior de `MYNEXT`, caja de cliente y empresa con borde negro de esquina redondeada.
-     - Tabla con cabecera negra sólida y barra final de `TOTAL €`.
-     - Caja de **Información de Pago** (Revolut, Musa Abdul, IBAN `ES39...`) y tarjeta negra con texto dorado *"GRACIAS POR CONFIAR EN MYNEXT"*.
-  2. **Plantilla de Entregas & Propuestas (`DeliveryTemplate`)**:
-     - Réplica exacta de `PDF-PARA-CLIENTES.pdf`.
-     - Fondo negro oscuro de lujo (`#0C0C0E`), cabecera con líneas doradas y subtítulo `PROJECT DELIVERY`.
-     - Píldora/botón dorado interactivo `ACCEDER A LA DEMO ✨` enlazando directamente al proyecto.
-     - Firma final *"Gracias por confiar en MYNEXT"* con marca de agua `MN` y `MADE BY MYNEXT`.
-- **Despliegue**: Todos los cambios se mantienen estrictamente en la rama local **`dev`** (sin `merge` a `main` ni `push`).
+### 🛠️ Lo realizado hoy:
 
-### 📁 Archivos modificados:
+1. **Métricas Reales (sin datos falsos)**:
+   - Eliminadas todas las cifras estáticas/inventadas del modal de proyectos.
+   - Conectado el endpoint `/api/cloudflare/project-health` con la API oficial de Cloudflare Pages para obtener datos reales por proyecto: total de despliegues, último commit de GitHub, rama activa, latencia de ping y SSL.
+   - Integrados accesos directos a las consolas oficiales de Microsoft Clarity y Cloudflare Analytics.
+
+2. **Plantillas PDF rediseñadas**:
+   - `InvoiceTemplate`: Réplica del diseño de `ECUAPLAC-FACTURA.pdf` (fondo marfil, tabla con cabecera negra, caja de pago Revolut con IBAN real, marca MYNEXT).
+   - `DeliveryTemplate`: Réplica del diseño de `PDF-PARA-CLIENTES.pdf` (fondo negro luxury, botón dorado "ACCEDER A LA DEMO", soporte bilingüe ES/EN).
+
+3. **Barra de navegación iPhone mejorada**:
+   - Safe area con `env(safe-area-inset-bottom)` para que no choque con el Home indicator del iPhone.
+   - Tab activo con borde dorado y fondo premium.
+
+4. **Bot de Telegram inteligente**:
+   - Comprende lenguaje natural: "¿cómo está ecuaplac?", "hola", "visitas", etc.
+   - Realiza ping en vivo a las webs y responde con estado HTTP, latencia y SSL.
+   - Fallback conversacional con sugerencias de uso.
+
+5. **Informe Matutino Diario por Telegram (8:00 AM)**:
+   - Nuevo endpoint `/api/cron/daily-report` que hace ping a TODAS las webs de Cloudflare Pages.
+   - Configurado en `vercel.json` con cron `0 6 * * *` (06:00 UTC = 08:00 España).
+   - Envía informe completo por Telegram: webs operativas (🟢) o caídas (🔴) con latencia de cada una.
+
+### 📁 Archivos modificados/creados:
+- `src/app/api/cloudflare/project-health/route.ts`
+- `src/app/api/cron/daily-report/route.ts` *(NUEVO)*
+- `src/app/api/telegram/webhook/route.ts`
+- `src/components/dashboard/project-detail-modal.tsx`
+- `src/components/layout/app-layout.tsx`
 - `src/lib/pdf/invoice-template.tsx`
 - `src/lib/pdf/delivery-template.tsx`
-- `docs/SESSION_LATEST_ES.md`
+- `vercel.json`
 
-### 📌 Estado de Control:
-- **Rama Actual**: `dev` (Desarrollo local exclusivamente).
-- **GitHub / Vercel**: Sin cambios en `main` hasta tu confirmación explícita.
+### 📌 Estado:
+- **Rama activa**: `dev` (todo local, sin push a `main`).
+- **Pendiente de subir a GitHub/Vercel** cuando el usuario lo autorice.
