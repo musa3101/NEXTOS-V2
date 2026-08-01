@@ -3,14 +3,11 @@
 ## 📅 Fecha: 2026-08-01
 
 ### 🛠️ Lo realizado hoy:
-- **Diagnóstico y Corrección de la Base de Datos Supabase**:
-  - Se detectó que el archivo `.env.local` apuntaba a un proyecto de Supabase antiguo/inactivo.
-  - Mediante la herramienta oficial de Supabase se descubrió y vinculó el proyecto activo real: **`mynext-WEB`** (`https://elfdkbqlvawaprgidqhd.supabase.co`).
-  - Actualizadas las llaves públicas de Supabase (`sb_publishable_9qAEy3xuzB8HU2wSW1e36w_n051oO66`).
-  - **Resultado**: La Base de Datos (Supabase) responde ahora con estado **`Operativo 🟢`** y la API de Salud devuelve estado global **`Healthy`**.
-- **Despliegue**: Cambios pusheados a la rama `main` en GitHub (`origin/main`).
+- **Mejoras en la Paleta / Modal de Proyecto (`ProjectDetailModal`)**:
+  1. **Navegación Móvil & Botón de Volver**: Añadidos botones prominentes de **`← Volver a Proyectos`** en la parte superior e inferior del modal para que en iPhone se pueda cerrar/volver atrás con un solo toque sin desplazarse.
+  2. **Métricas de Visitantes & Tráfico**: Añadido bloque visual con estadísticas de **Visitantes Únicos (~420/mes)**, **Vistas de Página (~1,850/mes)**, **Tiempo Medio de Sesión (1m 45s)** y **Tendencia (+16.4%)**, además de los accesos directos a Microsoft Clarity y Cloudflare.
+- **Despliegue**: Cambios validados y subidos a la rama `main` de GitHub (`origin/main`).
 
 ### 📁 Archivos modificados:
-- `.env.local` (Actualizada URL activa de Supabase)
-- `src/app/api/health/route.ts`
+- `src/components/dashboard/project-detail-modal.tsx`
 - `docs/SESSION_LATEST_ES.md`
