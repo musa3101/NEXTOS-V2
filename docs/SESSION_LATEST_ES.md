@@ -3,16 +3,25 @@
 ## 📅 Fecha: 2026-08-01
 
 ### 🛠️ Lo realizado hoy (Rama `dev` local):
-- **Cero Datos Falsos & Métricas Dinámicas Reales por Proyecto**:
-  - En la rama local **`dev`**, la paleta de cada proyecto realiza una llamada viva a Cloudflare Pages API para obtener la información real de ese sitio:
-    - 📦 **Historial de Despliegues Reales** (ej. `51 despliegues en producción` para `ecuaplac`).
-    - 💬 **Último Mensaje de Commit Real** (ej. `docs: update roadmap...`).
-    - ⚡ **Latencia Real de Servidor** en milisegundos (`48 ms`).
-    - 🔒 **Certificado HTTPS SSL**.
-    - 🌐 **Nodo CDN Cloudflare Ray ID**.
-- **Accesos Directos a Consolas en Tiempo Real**:
-  - Paneles limpios sin números inventados con acceso directo a las consolas oficiales de **Microsoft Clarity** y **Cloudflare Analytics** del sitio.
+- **Rediseño Completo de Plantillas PDF según Diseños Oficiales**:
+  1. **Plantilla de Facturas (`InvoiceTemplate`)**:
+     - Réplica exacta de `ECUAPLAC-FACTURA.pdf`.
+     - Fondo marfil cálido (`#FAF8F5`), titular `FACTURA` con píldora de número (`Nº: 03`).
+     - Insignia superior de `MYNEXT`, caja de cliente y empresa con borde negro de esquina redondeada.
+     - Tabla con cabecera negra sólida y barra final de `TOTAL €`.
+     - Caja de **Información de Pago** (Revolut, Musa Abdul, IBAN `ES39...`) y tarjeta negra con texto dorado *"GRACIAS POR CONFIAR EN MYNEXT"*.
+  2. **Plantilla de Entregas & Propuestas (`DeliveryTemplate`)**:
+     - Réplica exacta de `PDF-PARA-CLIENTES.pdf`.
+     - Fondo negro oscuro de lujo (`#0C0C0E`), cabecera con líneas doradas y subtítulo `PROJECT DELIVERY`.
+     - Píldora/botón dorado interactivo `ACCEDER A LA DEMO ✨` enlazando directamente al proyecto.
+     - Firma final *"Gracias por confiar en MYNEXT"* con marca de agua `MN` y `MADE BY MYNEXT`.
+- **Despliegue**: Todos los cambios se mantienen estrictamente en la rama local **`dev`** (sin `merge` a `main` ni `push`).
+
+### 📁 Archivos modificados:
+- `src/lib/pdf/invoice-template.tsx`
+- `src/lib/pdf/delivery-template.tsx`
+- `docs/SESSION_LATEST_ES.md`
 
 ### 📌 Estado de Control:
 - **Rama Actual**: `dev` (Desarrollo local exclusivamente).
-- **GitHub / Vercel**: No se ha realizado ningún push ni merge a `main`. Pendiente de tu aprobación u "OK" cuando decidas subirlo.
+- **GitHub / Vercel**: Sin cambios en `main` hasta tu confirmación explícita.

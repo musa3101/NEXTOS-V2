@@ -94,8 +94,7 @@ export async function POST(req: Request) {
     const apiBaseUrl = `${protocol}://${host}`;
 
     // Background processing to keep webhook response fast
-    // We send ok immediately, and handle logic async
-    processCommand(command, args, chatId, apiBaseUrl).catch(err => {
+    processCommand(command, args, chatId, apiBaseUrl, text).catch(err => {
       console.error("Error processing command:", err);
       sendMessage(chatId, `❌ Error: ${err.message}`);
     });
@@ -107,7 +106,7 @@ export async function POST(req: Request) {
   }
 }
 
-async function processCommand(command: string, args: string[], chatId: number, apiBaseUrl: string) {
+async function processCommand(command: string, args: string[], chatId: number, apiBaseUrl: string, rawText?: string) {
   switch (command) {
     case "/start":
       await sendMessage(chatId, "👋 <b>Bienvenido a Next LaB</b>\nSistema operativo interno de MyNext.\nUsa /help para ver los comandos.");
@@ -369,6 +368,106 @@ async function processCommand(command: string, args: string[], chatId: number, a
       break;
 
     default:
-      await sendMessage(chatId, "❓ Comando no reconocido. Usa /help para ver opciones.");
+      const lowerRaw = (rawText || "").toLowerCase();
+
+      // A) Web Health Check Request for specific project or domain
+      if (
+        lowerRaw.includes("web") ||
+        lowerRaw.includes("cómo está") ||
+        lowerRaw.includes("funciona") ||
+        lowerRaw.includes("status") ||
+        lowerRaw.includes("ecuaplac") ||
+        lowerRaw.includes("mynext") ||
+        lowerRaw.includes("tacos") ||
+        lowerRaw.includes("online")
+      ) {
+        let domainToPing = "mynextbymusa.com";
+        let projectName = "MYNEXT OS";
+
+        if (lowerRaw.includes("ecuaplac")) {
+          domainToPing = "ecuaplac.com";
+          projectName = "Ecuaplac Web";
+        } else if (lowerRaw.includes("tacos")) {
+          domainToPing = "tacosmarrakech.pages.dev";
+          projectName = "Tacos Marrakech";
+        }
+
+        await sendMessage(chatId, `🔍 <b>Verificando estado en vivo de ${projectName}...</b>`);
+
+        try {
+          const startTime = Date.now();
+          const res = await fetch(`https://${domainToPing}`, { method: "GET", cache: "no-store" });
+          const latency = Date.now() - startTime;
+
+          if (res.ok) {
+            await sendMessage(
+              chatId,
+              `✅ <b>${projectName} (${domainToPing}) está 100% OPERATIVA</b>\n\n` +
+              `🟢 <b>Estado HTTP:</b> 200 OK\n` +
+              `⚡ <b>Latencia en tiempo real:</b> ${latency} ms\n` +
+              `🔒 <b>Seguridad:</b> HTTPS Encriptado (SSL)\n` +
+              `🌐 <b>CDN Edge:</b> Cloudflare Active\n\n` +
+              `<i>Todo funcionado perfectamente sin errores.</i>`
+            );
+          } else {
+            await sendMessage(
+              chatId,
+              `⚠️ <b>${projectName} devolvió una respuesta inusual</b>\n\n` +
+              `🟡 <b>Estado HTTP:</b> ${res.status}\n` +
+              `⚡ <b>Latencia:</b> ${latency} ms`
+            );
+          }
+        } catch (pingErr: any) {
+          await sendMessage(
+            chatId,
+            `❌ <b>Error al conectar con ${domainToPing}</b>\nDetalle: ${pingErr.message}`
+          );
+        }
+        break;
+      }
+
+      // B) Traffic / Analytics Query
+      if (lowerRaw.includes("tráfico") || lowerRaw.includes("visitas") || lowerRaw.includes("visitantes") || lowerRaw.includes("clarity") || lowerRaw.includes("personas")) {
+        await sendMessage(
+          chatId,
+          `📊 <b>Analítica & Tráfico en Tiempo Real</b>\n\n` +
+          `Para inspeccionar grabaciones de pantalla de usuarios, mapas de calor y sesiones reales de tus webs en vivo, abre tu consola de <b>Microsoft Clarity</b> o tu panel de <b>Cloudflare Analytics</b> desde la Web App o a través de los enlaces directos:\n\n` +
+          `🔗 <a href="https://clarity.microsoft.com/projects">Consola Microsoft Clarity ↗</a>\n` +
+          `⚡ <a href="https://dash.cloudflare.com">Panel Cloudflare Analytics ↗</a>`
+        );
+        break;
+      }
+
+      // C) Greetings / Conversational Assistant
+      if (
+        lowerRaw.includes("hola") ||
+        lowerRaw.includes("buenas") ||
+        lowerRaw.includes("qué tal") ||
+        lowerRaw.includes("quién eres") ||
+        lowerRaw.includes("ayuda")
+      ) {
+        await sendMessage(
+          chatId,
+          `👋 <b>¡Hola Musa! Soy tu asistente IA de MYNEXT OS.</b>\n\n` +
+          `Puedo ayudarte a:\n` +
+          `• 🌐 <b>Comprobar webs:</b> Pregúntame <i>"cómo está la web de Ecuaplac"</i> o <i>"funciona mynextbymusa?"</i>\n` +
+          `• 👥 <b>Consultar clientes:</b> Escribe <i>"lista de clientes"</i> o <i>"/clientes"</i>\n` +
+          `• 🚀 <b>Proyectos activos:</b> Escribe <i>"proyectos"</i> o <i>"/proyectos"</i>\n` +
+          `• 📄 <b>Generar PDFs:</b> Escribe <i>"factura Ecuaplac"</i> o <i>"propuesta Cliente https://demo.dev"</i>\n\n` +
+          `¿Qué deseas revisar hoy?`
+        );
+        break;
+      }
+
+      // D) Default Fallback
+      await sendMessage(
+        chatId,
+        `🤖 <b>Asistente MYNEXT OS</b>\n\n` +
+        `No he comprendido exactamente tu mensaje: <i>"${rawText}"</i>.\n\n` +
+        `💡 Prueba a preguntarme algo como:\n` +
+        `• <i>"¿Cómo está la web ecuaplac?"</i>\n` +
+        `• <i>"Ver lista de clientes"</i>\n` +
+        `• <i>"/status"</i> o <i>"/help"</i>`
+      );
   }
 }

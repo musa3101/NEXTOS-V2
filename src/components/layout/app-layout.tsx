@@ -81,8 +81,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       </div>
 
-      {/* 📱 iOS Native Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#121217]/90 backdrop-blur-xl border-t border-[#D4A853]/20 px-2 pt-2 pb-safe shadow-[0_-10px_25px_rgba(0,0,0,0.7)] flex justify-around items-center">
+      {/* 📱 iOS Native Mobile Bottom Navigation Bar (Elevated for iPhone Home Indicator) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#121217]/95 backdrop-blur-2xl border-t border-[#D4A853]/30 px-2 pt-2.5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.9)] flex justify-around items-center">
         {mobileNavItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           const Icon = item.icon;
@@ -90,14 +90,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all active:scale-95 min-w-[60px] ${
+              className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-2xl transition-all active:scale-95 min-w-[62px] ${
                 isActive
-                  ? "text-[#D4A853] font-bold bg-[#D4A853]/10"
-                  : "text-[#888] hover:text-[#ccc]"
+                  ? "text-[#D4A853] font-extrabold bg-[#D4A853]/15 shadow-sm border border-[#D4A853]/30"
+                  : "text-[#999] hover:text-[#ccc]"
               }`}
             >
               <Icon className={`w-5 h-5 transition-transform ${isActive ? "scale-110 text-[#D4A853]" : ""}`} />
-              <span className="text-[10px] tracking-tight">{item.name}</span>
+              <span className="text-[10px] tracking-tight font-medium">{item.name}</span>
             </Link>
           );
         })}
