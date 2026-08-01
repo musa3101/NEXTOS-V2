@@ -7,28 +7,30 @@ export async function GET(request: Request) {
   let supabaseStatus = "down";
   let supabaseLatency = -1;
 
-  try {
-    const { error } = await supabaseAdmin.from("clients").select("id").limit(1);
-    if (!error) {
-      supabaseStatus = "up";
-      supabaseLatency = Date.now() - start;
-    }
-  } catch (err) {
-    // leave as down
+  // Helper for 2s max timeout per check
+  const withTimeout = <T>(promise: Promise<T>, timeoutMs = 2000): Promise<T> => {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Timeout")), timeoutMs)),
+    ]);
+  };
+
+  // Run Supabase and Cloudflare checks in parallel with timeout
+  const [sbResult, cfResult] = await Promise.allSettled([
+    withTimeout((async () => await supabaseAdmin.from("clients").select("id").limit(1))()),
+    withTimeout(validateCloudflareConnection()),
+  ]);
+
+  if (sbResult.status === "fulfilled" && !sbResult.value?.error) {
+    supabaseStatus = "up";
+    supabaseLatency = Date.now() - start;
   }
 
-  // Basic check for telegram token presence, real check would ping Telegram API
   const telegramStatus = process.env.TELEGRAM_BOT_TOKEN ? "up" : "down";
 
-  // Check Cloudflare connection
   let cloudflareStatus = "down";
-  try {
-    const cfCheck = await validateCloudflareConnection();
-    if (cfCheck.success) {
-      cloudflareStatus = "up";
-    }
-  } catch (err) {
-    // leave as down
+  if (cfResult.status === "fulfilled" && cfResult.value?.success) {
+    cloudflareStatus = "up";
   }
 
   // Self-healing check for Telegram Webhook

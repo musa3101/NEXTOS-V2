@@ -3,18 +3,14 @@
 ## 📅 Fecha: 2026-08-01
 
 ### 🛠️ Lo realizado hoy:
-- Conectada la cuenta principal de Cloudflare (`mynextbymusa@gmail.com`).
-- Eliminadas URLs y datos estáticos/falsos.
-- Detección automática de dominios personalizados (`mynextbymusa.com`, `ecuaplac.com`).
-- Implementada la paleta/modal flotante e interactiva `ProjectDetailModal` con comprobación de salud en tiempo real (HTTP 200, latencia en ms, SSL) y accesos directos a **Microsoft Clarity** y **Cloudflare Analytics**.
-- Aplicado el logo oficial de la marca (**Isotipo MN**) en la interfaz, favicon e icono de pantalla de inicio para iOS.
-- Experiencia Web App para iPhone con Barra de Navegación Inferior (Bottom Tab Bar).
-- Solucionado el congelamiento y parpadeo en la vista de proyectos.
-- **Despliegue**: Cambios fusionados y subidos a la rama `main` de GitHub (`origin/main`) para despliegue automático en Vercel.
+- **Corregido Error de Sintaxis JSX**: Solucionada la etiqueta de cierre `</div>` faltante en [src/app/documents/page.tsx](file:///Users/musa/Downloads/PROJ%20recientes/webs/v2-nextos/src/app/documents/page.tsx).
+- **Tarjetas de Métricas de Facturación**: Añadido panel resumen en la vista de Documentos con Total Documentos, Total Facturado (€) y Desglose Facturas vs Entregas.
+- **Vista de Clientes**: Configurado `onlyCloudflare: false` por defecto para listar todos los clientes al entrar a la sección.
+- **Monitorización**: Actualizada la tarjeta de Cloudflare Edge & CDN a estado operativo en tiempo real.
+- **Despliegue**: Cambios validados con `npm run build` e impulsados a la rama `main` en GitHub (`origin/main`).
 
-### 📁 Archivos modificados/creados:
-- Todos los cambios commiteados y subidos a GitHub `main`.
-- Rama actual de trabajo local: `dev`.
-
-### 📌 Estado:
-- Despliegue en producción enviado a Vercel.
+### 📁 Archivos modificados:
+- `src/app/documents/page.tsx`
+- `src/app/clients/page.tsx`
+- `src/app/monitoring/page.tsx`
+- `docs/SESSION_LATEST_ES.md`

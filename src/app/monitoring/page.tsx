@@ -114,8 +114,17 @@ function MonitorCard({ title, description, status, latency, icon: Icon, bgImage 
           <div className="p-3 bg-black/40 backdrop-blur-md rounded-xl border border-[#D4A853]/30 shadow-[0_0_12px_rgba(212,168,83,0.15)]">
             <Icon className="w-6 h-6 text-[#D4A853]" />
           </div>
-          <Badge variant={isUp ? "success" : isPending ? "warning" : "danger"} className="backdrop-blur-md shadow-md">
-            {isUp ? "Operativo" : isPending ? "Próximamente" : "Caído"}
+          <Badge 
+            variant={isUp ? "success" : isPending ? "warning" : "default"} 
+            className={`backdrop-blur-md shadow-md ${
+              isUp 
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                : isPending 
+                ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                : "bg-red-500/15 text-red-300 border border-red-500/30"
+            }`}
+          >
+            {isUp ? "Operativo 🟢" : isPending ? "En Desarrollo" : "Sin Conexión 🔴"}
           </Badge>
         </div>
         
