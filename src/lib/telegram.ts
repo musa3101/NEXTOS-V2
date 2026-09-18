@@ -66,6 +66,66 @@ export async function sendDocument(chatId: string | number, buffer: Buffer, file
   }
 }
 
+/**
+ * Get a direct download URL for a Telegram file (photo, voice, audio, document).
+ * Uses getFile API to get file_path, then constructs the download URL.
+ */
+export async function getFileUrl(fileId: string): Promise<string | null> {
+  if (!process.env.TELEGRAM_BOT_TOKEN) return null;
+
+  try {
+    const res = await fetch(`${getTelegramApi()}/getFile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_id: fileId }),
+    });
+
+    if (!res.ok) {
+      console.error("Telegram getFile failed:", await res.text());
+      return null;
+    }
+
+    const data = await res.json();
+    const filePath = data?.result?.file_path;
+    if (!filePath) return null;
+
+    return `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${filePath}`;
+  } catch (err) {
+    console.error("Telegram getFile error:", err);
+    return null;
+  }
+}
+
+/**
+ * Download a Telegram file and return it as a base64 data URI.
+ * Returns { base64DataUri, mimeType } or null on failure.
+ */
+export async function downloadFileAsBase64(
+  fileId: string,
+  fallbackMime: string = "application/octet-stream"
+): Promise<{ base64DataUri: string; mimeType: string } | null> {
+  const url = await getFileUrl(fileId);
+  if (!url) return null;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error("Failed to download Telegram file:", res.status);
+      return null;
+    }
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const contentType = res.headers.get("content-type") || fallbackMime;
+    const base64 = buffer.toString("base64");
+    const base64DataUri = `data:${contentType};base64,${base64}`;
+
+    return { base64DataUri, mimeType: contentType };
+  } catch (err) {
+    console.error("Telegram file download error:", err);
+    return null;
+  }
+}
+
 export async function setWebhook(url: string) {
   if (!process.env.TELEGRAM_BOT_TOKEN) return;
 
