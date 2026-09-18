@@ -15,13 +15,17 @@
 - [x] Safe area en barra móvil inferior para iPhone (Home indicator).
 - [x] Migración completa de backend de Supabase a InsForge (PostgreSQL + SDK `@insforge/sdk`).
 - [x] Creación de esquema y tablas relacionales en InsForge (`clients`, `projects`, `documents`, `activity_logs`).
-- [x] Sincronización automática de proyectos Cloudflare con InsForge (12 proyectos sincronizados).
-- [x] Fusión de rama `dev` en `main`.
+- [x] Sincronización automática de proyectos Cloudflare con InsForge (12 proyectos y 12 clientes).
+- [x] Modal de Ajustes de Administrador y Cierre de Sesión seguro e independiente en el Sidebar.
+- [x] Eliminación de métricas ficticias de Ubuntu y visualización de infraestructura real en Dashboard.
+- [x] Botón interactivo "Refrescar Cloudflare" con spinner y sincronización bidireccional.
+- [x] Selector de Clientes y Proyectos en Documentos con carga anticipada y estados claros.
+- [x] Configuración de variables de Cloudflare e InsForge en Vercel y despliegue a producción en `main`.
+- [x] 100% de suites de tests unitarios pasando (24/24 pruebas).
 
 ## 🔄 Tareas en Progreso
-- [ ] Configurar variables de entorno de InsForge en el panel de Vercel para producción.
+- [ ] Validación continua del informe matutino de Telegram.
 
 ## 🎯 Próximas Mejoras Prioritarias
-- [ ] Configurar `TELEGRAM_AUTHORIZED_USER_ID` para habilitar el envío del informe matutino diario.
-- [ ] Disparador de despliegues (Trigger Deploy) manual a Cloudflare desde NextOS.
-- [ ] Sección de actividad reciente en el Dashboard (últimos documentos, deploys, pings).
+- [ ] Configurar `TELEGRAM_AUTHORIZED_USER_ID` en Vercel para habilitar el envío del informe diario a las 8:00 AM.
+- [ ] Sección de filtros avanzados y exportación CSV de clientes y facturas.

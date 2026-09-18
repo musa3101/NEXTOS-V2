@@ -4,59 +4,49 @@
 
 ### 🛠️ Qué se ha hecho hoy:
 
-1. **Auditoría completa del backend:**
-   - Detección de fallos en Supabase (falta de tablas del esquema `clients`, `projects`, `documents` y clave `service_role` errónea).
-   - Detección del token de Cloudflare expirado en `.env.local`.
-   - Diagnóstico del bot de Telegram y verificación del webhook en vivo.
+1. **Modal de Ajustes de Administrador y Cierre de Sesión Seguro:**
+   - Creado `src/components/layout/admin-settings-modal.tsx` con detalles de la cuenta (`Admin`, `mynextbymusa@gmail.com`), estado en vivo de servicios conectados (InsForge PostgreSQL, Cloudflare Pages, Telegram Bot), botón de sincronización manual rápida y logout con confirmación en dos pasos.
+   - En `src/components/layout/sidebar.tsx`, se separó el botón de cerrar sesión para que hacer clic sobre "Admin" abra los ajustes en lugar de expulsar al usuario.
 
-2. **Migración completa a InsForge:**
-   - Creado proyecto oficial `nextos-v2` en InsForge (región `eu-central`).
-   - Aplicada la migración SQL (`migrations/20260918161646_init-schema.sql`) creando las 4 tablas en PostgreSQL: `clients`, `projects`, `documents`, `activity_logs` con RLS y triggers.
-   - Instalado `@insforge/sdk@latest` y eliminado `@supabase/supabase-js`.
-   - Creada la capa de conexión en `src/lib/insforge/` (`client.ts` y `server.ts` con `createAdminClient`).
-   - Mantenida capa retrocompatible en `src/lib/supabase/` para redirigir a InsForge sin romper código existente.
+2. **Limpieza del Dashboard y Feedback Interactivo:**
+   - Eliminada la simulación de CPU/RAM de Ubuntu y referencias obsoletas a Supabase.
+   - Añadida tarjeta real de infraestructura con los 12 sitios de Cloudflare, TLS 1.3 activo y latencia de base de datos InsForge.
+   - Corregido el endpoint `/api/dashboard` para que cuente todos los proyectos reales (mostrando 12 proyectos activos en vez de 0).
+   - Dotado al botón "Refrescar Cloudflare" de estado de carga con spinner, sincronización bidireccional con InsForge y aviso de confirmación ("¡12 webs sincronizadas!").
 
-3. **Adaptación de Rutas API:**
-   - Adaptados los endpoints `/api/clients`, `/api/projects`, `/api/documents`, `/api/activity`, `/api/dashboard`, `/api/health`, el webhook de Telegram y la sincronización con Cloudflare.
-   - Corregidos los inserts de datos al formato requerido por InsForge (`insert([{...}])`).
+3. **Carga y Visualización de Clientes y Documentos:**
+   - En `/clients`, añadido botón directo de sincronización en cabecera, resolución de dominios propios (`mynextbymusa.com`, `ecuaplac.com`), fallback de subdominios (`.pages.dev`) y botón de acción en estado vacío.
+   - En `/documents`, precarga anticipada de clientes y proyectos en caché desde el inicio, estados de carga claros en los selectores y soporte completo para facturas y actas de entrega.
 
-4. **Sincronización Automática con Cloudflare:**
-   - Actualizado el token de Cloudflare con el token activo maestro.
-   - Sincronizados con éxito los 12 proyectos reales de Cloudflare Pages directamente en la base de datos de InsForge.
+4. **Corrección de Tests Unitarios:**
+   - Actualizados `tests/unit/activity.test.ts` y `tests/unit/api-health.test.ts` para mockear correctamente `insforgeAdmin`.
+   - 100% de suites pasando (6 de 6 suites, 24 de 24 tests unitarios).
 
-5. **Optimización de Proxy y Compilación:**
-   - Configurado `src/proxy.ts` optimizado para Turbopack en Next.js 16 (compila en 1.3s con 0 errores).
-
-6. **Merge a `main`:**
-   - Fusión completada de la rama `dev` hacia la rama `main` con autorización del usuario.
+5. **Despliegue y Validación en Producción (Vercel):**
+   - Actualizadas las variables de entorno de Cloudflare en Vercel con el token maestro activo.
+   - Subidos los cambios a las ramas `main` y `dev` en GitHub.
+   - Despliegue de producción completado en `https://nextos-v2.vercel.app` y verificado en vivo.
 
 ### 📁 Archivos modificados:
-- `.env.local`
-- `package.json` y `package-lock.json`
-- `migrations/20260918161646_init-schema.sql` (NUEVO)
-- `src/lib/insforge/client.ts` (NUEVO)
-- `src/lib/insforge/server.ts` (NUEVO)
-- `src/lib/insforge/types.ts` (NUEVO)
-- `src/lib/supabase/client.ts`
-- `src/lib/supabase/server.ts`
-- `src/lib/activity.ts`
-- `src/lib/cloudflare-sync.ts`
-- `src/app/api/clients/route.ts` y `[id]/route.ts`
-- `src/app/api/projects/route.ts` y `[id]/route.ts`
-- `src/app/api/documents/route.ts` y `[id]/pdf/route.ts`
+- `src/components/layout/admin-settings-modal.tsx` (NUEVO)
+- `src/components/layout/sidebar.tsx`
+- `src/app/page.tsx`
+- `src/app/clients/page.tsx`
+- `src/app/documents/page.tsx`
+- `src/app/monitoring/page.tsx`
 - `src/app/api/dashboard/route.ts`
-- `src/app/api/activity/route.ts`
-- `src/app/api/health/route.ts`
-- `src/app/api/telegram/webhook/route.ts`
-- `src/proxy.ts`
+- `tests/unit/activity.test.ts`
+- `tests/unit/api-health.test.ts`
 - `docs/SESSION_LATEST_ES.md`
 - `docs/ROADMAP.md`
 
 ### 🔧 Qué problemas se han solucionado:
-- Error `PGRST205` de tabla no encontrada en Supabase solucionado migrando todo el esquema a InsForge.
-- Error `10000 Authentication error` de Cloudflare resuelto con el token activo.
-- Rutas de API caídas ahora responden con `200 OK` y salud global `healthy`.
+- El botón "Admin" ya no expulsa al usuario al pulsarlo, sino que abre el modal de ajustes y perfil.
+- El Dashboard ya no muestra métricas falsas de Ubuntu ni referencias a Supabase; ahora muestra el estado real de Cloudflare e InsForge.
+- Corregido el contador de proyectos del Dashboard de 0 a 12.
+- El botón "Refrescar Cloudflare" ahora responde con animación y sincronización real.
+- El listado de clientes y los selectores del modal de documentos ya no aparecen vacíos en producción.
+- Tests unitarios pasando al 100%.
 
 ### 📌 Qué queda pendiente:
-- Definir `TELEGRAM_AUTHORIZED_USER_ID` en las variables de entorno de producción para el informe matutino.
-- Desplegar la nueva versión a Vercel vinculando las variables de entorno de InsForge.
+- Configurar `TELEGRAM_AUTHORIZED_USER_ID` para habilitar el envío automático del informe matutino diario de las 8:00 AM.
