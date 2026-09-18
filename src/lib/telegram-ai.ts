@@ -466,7 +466,6 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
               type: "invoice",
               number,
               total_amount: totalAmount,
-              status: "sent",
               template_data: {
                 clientAddress: args.clientAddress || "",
                 items,
@@ -556,7 +555,6 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
               client_id: clientId || null,
               type: "delivery",
               number,
-              status: "sent",
               template_data: {
                 is_proposal: true,
                 clientName: businessName,
