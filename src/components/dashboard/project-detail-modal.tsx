@@ -19,7 +19,8 @@ import {
   ArrowUpRight,
   ArrowLeft,
   Users,
-  MousePointerClick
+  MousePointerClick,
+  Rocket
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getPrimaryProjectUrl } from "@/lib/cloudflare";
@@ -34,6 +35,8 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
 
   const [health, setHealth] = useState<any>(null);
   const [healthLoading, setHealthLoading] = useState<boolean>(true);
+  const [deploying, setDeploying] = useState<boolean>(false);
+  const [deployResult, setDeployResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Function to run live ping & health check
   const checkHealth = async () => {
@@ -51,6 +54,48 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
       });
     } finally {
       setHealthLoading(false);
+    }
+  };
+
+  // Function to trigger Cloudflare manual deployment
+  const handleTriggerDeploy = async () => {
+    if (deploying || !project?.name) return;
+    setDeploying(true);
+    setDeployResult(null);
+
+    try {
+      const branch = health?.cfDetails?.productionBranch || project?.production_branch || "main";
+      const res = await fetch("/api/cloudflare/deploy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectName: project.name,
+          branch,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setDeployResult({
+          success: true,
+          message: `Despliegue activado con éxito (ID: ${data.deploymentId?.substring(0, 8)})`,
+        });
+        setTimeout(() => {
+          checkHealth();
+        }, 4000);
+      } else {
+        setDeployResult({
+          success: false,
+          message: data.error || "Error al solicitar despliegue en Cloudflare",
+        });
+      }
+    } catch (err: any) {
+      setDeployResult({
+        success: false,
+        message: err.message || "Error de conexión al disparar despliegue",
+      });
+    } finally {
+      setDeploying(false);
     }
   };
 
@@ -234,6 +279,30 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
           </div>
         </div>
 
+        {/* FEEDBACK DE DESPLIEGUE */}
+        {deployResult && (
+          <div className={`p-3.5 rounded-xl border text-xs font-medium flex items-center justify-between gap-3 animate-in fade-in duration-200 ${
+            deployResult.success 
+              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+              : "bg-red-500/10 border-red-500/30 text-red-300"
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {deployResult.success ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+              )}
+              <span>{deployResult.message}</span>
+            </div>
+            <button 
+              onClick={() => setDeployResult(null)}
+              className="text-[#888] hover:text-white text-xs px-1.5 py-0.5"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* SECTION 3: INFORMACIÓN DE DESPLIEGUE & VISIT WEB */}
         <div className="pt-3 border-t border-[#333]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-[#888] space-y-1 text-center sm:text-left">
@@ -246,6 +315,20 @@ export function ProjectDetailModal({ project, onClose }: ProjectDetailModalProps
           </div>
 
           <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={handleTriggerDeploy}
+              disabled={deploying}
+              className="w-full sm:w-auto px-4 py-3 rounded-xl bg-[#F38020]/20 hover:bg-[#F38020]/30 border border-[#F38020]/40 text-[#F38020] text-xs font-bold transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+              title="Disparar compilación y despliegue inmediato en Cloudflare Pages"
+            >
+              {deploying ? (
+                <RefreshCw className="w-4 h-4 animate-spin text-[#F38020]" />
+              ) : (
+                <Rocket className="w-4 h-4 text-[#F38020]" />
+              )}
+              <span>{deploying ? "Desplegando..." : "Desplegar Ahora"}</span>
+            </button>
+
             <a
               href={url}
               target="_blank"

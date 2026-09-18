@@ -95,8 +95,11 @@ export async function getCloudflareProjects(): Promise<CloudflareProject[]> {
   return allProjects;
 }
 
-// Prepared structure for future deploy from NextOS
-export async function triggerCloudflareDeploy(projectId: string, branch: string = "main"): Promise<{ success: boolean; deploymentId?: string }> {
+// Real trigger deploy invocation for Cloudflare Pages
+export async function triggerCloudflareDeploy(
+  projectName: string,
+  branch: string = "main"
+): Promise<{ success: boolean; deploymentId?: string; url?: string; error?: string }> {
   const token = process.env.CLOUDFLARE_API_TOKEN;
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
@@ -104,9 +107,37 @@ export async function triggerCloudflareDeploy(projectId: string, branch: string 
     throw new Error("Missing Cloudflare credentials");
   }
 
-  // Prepares the HTTP call structure without fully executing deployment until phase 2 configuration is verified
-  console.log(`[Cloudflare Deploy] Prepared deploy invocation for project ${projectId} on branch ${branch}`);
-  
-  // Real endpoint: POST https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectId}/deployments
-  return { success: true, deploymentId: "mock-deploy-id-phase-2-ready" };
+  try {
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          branch,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const errMsg = errData.errors?.[0]?.message || `Error HTTP ${res.status}`;
+      return { success: false, error: errMsg };
+    }
+
+    const data = await res.json();
+    const deployment = data.result;
+
+    return {
+      success: true,
+      deploymentId: deployment?.id || deployment?.short_id,
+      url: deployment?.url,
+    };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
+
