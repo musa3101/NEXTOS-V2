@@ -93,11 +93,13 @@ export async function POST(req: Request) {
     const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
     const apiBaseUrl = `${protocol}://${host}`;
 
-    // Background processing to keep webhook response fast
-    processCommand(command, args, chatId, apiBaseUrl, text).catch(err => {
+    // Execute command and wait for response to ensure message is sent before serverless lambda freezes
+    try {
+      await processCommand(command, args, chatId, apiBaseUrl, text);
+    } catch (err: any) {
       console.error("Error processing command:", err);
-      sendMessage(chatId, `❌ Error: ${err.message}`);
-    });
+      await sendMessage(chatId, `❌ Error: ${err.message}`);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
