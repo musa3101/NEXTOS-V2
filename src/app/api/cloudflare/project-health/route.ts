@@ -90,6 +90,26 @@ export async function GET(request: Request) {
       }
     }
 
+    // If custom domain gave 403 (Cloudflare WAF challenge on datacenter IP), check canonical pages.dev
+    if (statusCode === 403 && cfDetails?.subdomain) {
+      try {
+        const fallbackUrl = `https://${cfDetails.subdomain}`;
+        const fallbackRes = await fetch(fallbackUrl, {
+          method: "GET",
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+          },
+          signal: AbortSignal.timeout(5000),
+          cache: "no-store",
+        });
+        if (fallbackRes.ok) {
+          isOk = true;
+          statusCode = 200;
+          serverHeader = fallbackRes.headers.get("server") || "cloudflare";
+        }
+      } catch (_) {}
+    }
+
     return NextResponse.json({
       success: true,
       url: targetUrl,
