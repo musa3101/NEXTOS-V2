@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const [clientsRes, projectsRes, docsRes] = await Promise.all([
       insforgeAdmin.from("clients").select("id", { count: "exact", head: true }),
-      insforgeAdmin.from("projects").select("id", { count: "exact", head: true }).eq("status", "development"),
+      insforgeAdmin.from("projects").select("id", { count: "exact", head: true }),
       insforgeAdmin.from("documents").select("id", { count: "exact", head: true }),
     ]);
 

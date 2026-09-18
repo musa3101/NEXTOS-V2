@@ -11,8 +11,8 @@ const { mockSelect, mockFrom, mockValidateCloudflareConnection } = vi.hoisted(()
   return { mockSelect, mockFrom, mockValidateCloudflareConnection };
 });
 
-vi.mock("@/lib/supabase/server", () => ({
-  supabaseAdmin: {
+vi.mock("@/lib/insforge/server", () => ({
+  insforgeAdmin: {
     from: mockFrom,
   },
 }));

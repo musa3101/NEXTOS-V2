@@ -56,10 +56,10 @@ export default function MonitoringPage() {
       {/* ═══ SERVICE CARDS with background images ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <MonitorCard 
-          title="Base de Datos (Supabase)" 
+          title="Base de Datos (InsForge PostgreSQL)" 
           description="Almacenamiento principal y autenticación"
-          status={health?.services?.supabase?.status}
-          latency={health?.services?.supabase?.latency}
+          status={health?.services?.insforge?.status || health?.services?.supabase?.status}
+          latency={health?.services?.insforge?.latency || health?.services?.supabase?.latency}
           icon={Database}
           bgImage={BG_IMAGES[0]}
         />

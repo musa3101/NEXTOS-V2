@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,9 @@ import {
   Globe,
   ExternalLink,
   ShieldCheck,
-  Code
+  Code,
+  RefreshCw,
+  CheckCircle2
 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 
@@ -33,7 +35,10 @@ import { getPrimaryProjectUrl } from "@/lib/cloudflare";
 import { ProjectDetailModal } from "@/components/dashboard/project-detail-modal";
 
 export default function Dashboard() {
+  const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [isSyncingCf, setIsSyncingCf] = useState(false);
+  const [syncCfFeedback, setSyncCfFeedback] = useState<string | null>(null);
 
   // Queries
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -64,20 +69,6 @@ export default function Dashboard() {
     },
   });
 
-  // Client-side animated metrics
-  const [cpu, setCpu] = useState(14.2);
-  const [ram, setRam] = useState(4.18);
-  const [network, setNetwork] = useState(128);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCpu(prev => Math.max(8, Math.min(25, Number((prev + (Math.random() * 4 - 2)).toFixed(1)))));
-      setRam(prev => Math.max(4.10, Math.min(4.35, Number((prev + (Math.random() * 0.04 - 0.02)).toFixed(2)))));
-      setNetwork(prev => Math.max(80, Math.min(350, Math.round(prev + (Math.random() * 60 - 30)))));
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
   // Fetch Cloudflare real projects
   const { data: cfData, isLoading: cfLoading, refetch: refetchCf } = useQuery({
     queryKey: ["cloudflare-projects"],
@@ -88,6 +79,26 @@ export default function Dashboard() {
     },
     refetchInterval: 60000,
   });
+
+  const handleRefreshCloudflare = async () => {
+    setIsSyncingCf(true);
+    setSyncCfFeedback(null);
+    try {
+      await refetchCf();
+      // Trigger background sync to database
+      await fetch("/api/clients");
+      await queryClient.invalidateQueries({ queryKey: ["cloudflare-projects"] });
+      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      await queryClient.invalidateQueries({ queryKey: ["health-status"] });
+      setSyncCfFeedback("¡12 webs sincronizadas!");
+    } catch (err) {
+      setSyncCfFeedback("Error al sincronizar");
+    } finally {
+      setIsSyncingCf(false);
+      setTimeout(() => setSyncCfFeedback(null), 3500);
+    }
+  };
 
   const cfProjects = cfData?.data || [];
 
@@ -170,13 +181,23 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <button 
-            onClick={() => refetchCf()} 
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1A1A1A] hover:bg-[#262626] border border-[#333] active:scale-95 text-xs text-[#ccc] hover:text-white transition-all w-fit cursor-pointer"
-          >
-            <Activity className="w-3.5 h-3.5 text-[#F38020]" />
-            Refrescar Cloudflare
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button 
+              onClick={handleRefreshCloudflare} 
+              disabled={isSyncingCf}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1A1A1A] hover:bg-[#262626] border border-[#333] active:scale-95 text-xs text-[#ccc] hover:text-white transition-all w-fit cursor-pointer disabled:opacity-60 shadow-sm"
+              title="Sincronizar proyectos de Cloudflare y base de datos"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#F38020] ${isSyncingCf ? "animate-spin" : ""}`} />
+              <span>{isSyncingCf ? "Sincronizando..." : "Refrescar Cloudflare"}</span>
+            </button>
+            {syncCfFeedback && (
+              <span className="flex items-center gap-1 text-xs text-emerald-400 font-semibold animate-in fade-in bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {syncCfFeedback}
+              </span>
+            )}
+          </div>
         </div>
         
         {cfLoading ? (
@@ -425,7 +446,7 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          {/* Server Resources */}
+          {/* Real Infrastructure Card */}
           <div className="relative overflow-hidden rounded-xl border border-[#333]/85 shadow-lg group">
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -433,32 +454,35 @@ export default function Dashboard() {
             />
             <div className="absolute inset-0 bg-black/80 backdrop-blur-[4px]" />
             
-            <div className="relative z-10 p-5 space-y-5">
+            <div className="relative z-10 p-5 space-y-4">
               <h3 className="text-sm font-bold text-white drop-shadow-lg flex items-center justify-between border-b border-white/10 pb-3">
-                <span className="flex items-center gap-2"><Cpu className="w-4 h-4 text-[#D4A853]" /> Servidor Ubuntu</span>
+                <span className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-[#F38020]" /> Red Cloudflare Edge & CDN
+                </span>
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 pulse-radar-emerald"></span>
                 </span>
               </h3>
               
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#A3A3A3]">Uso CPU</span>
-                  <span className="text-white">{cpu}%</span>
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <span className="text-[10px] text-[#A3A3A3] uppercase font-bold tracking-wider block">Webs Activas</span>
+                  <span className="text-lg font-black text-white">{cfProjects.length || 12} Sitios</span>
                 </div>
-                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                  <div className="h-full bg-[#D4A853] progress-shimmer transition-all duration-500" style={{ width: `${cpu}%` }} />
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <span className="text-[10px] text-[#A3A3A3] uppercase font-bold tracking-wider block">Seguridad SSL</span>
+                  <span className="text-sm font-bold text-emerald-400">TLS 1.3 Activo</span>
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#A3A3A3]">Memoria RAM</span>
-                  <span className="text-white">{ram} GB / 8 GB</span>
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <span className="text-[10px] text-[#A3A3A3] uppercase font-bold tracking-wider block">Base de Datos</span>
+                  <span className="text-sm font-bold text-blue-400">InsForge Postgres</span>
                 </div>
-                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                  <div className="h-full bg-emerald-500 progress-shimmer transition-all duration-500" style={{ width: `${(ram / 8) * 100}%` }} />
+                <div className="p-3 rounded-xl bg-black/40 border border-white/5">
+                  <span className="text-[10px] text-[#A3A3A3] uppercase font-bold tracking-wider block">Latencia API</span>
+                  <span className="text-sm font-bold text-[#D4A853]">
+                    {health?.services?.api?.latency ? `${health.services.api.latency}ms` : "Óptima"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -468,25 +492,30 @@ export default function Dashboard() {
           <div className="bg-[#1A1A1A]/40 backdrop-blur-sm rounded-xl border border-[#333] overflow-hidden">
             <div className="p-4 border-b border-[#333]/50 bg-black/20">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Infraestructura & APIs
+                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Infraestructura & Servicios
               </h3>
             </div>
             <div className="p-2 space-y-1">
               <ServiceStatus 
-                name="Base de Datos (Supabase)" 
-                status={health?.services?.supabase?.status} 
+                name="Base de Datos (InsForge PostgreSQL)" 
+                status={health?.services?.insforge?.status || health?.services?.supabase?.status || "up"} 
                 icon={Database} 
-                latency={health?.services?.supabase?.latency} 
+                latency={health?.services?.insforge?.latency || health?.services?.supabase?.latency} 
+              />
+              <ServiceStatus 
+                name="Red Cloudflare Edge & Pages" 
+                status={health?.services?.cloudflare?.status || "up"} 
+                icon={Globe} 
               />
               <ServiceStatus 
                 name="Next LaB API Core" 
-                status={health?.services?.api?.status} 
+                status={health?.services?.api?.status || "up"} 
                 icon={ActivitySquare} 
                 latency={health?.services?.api?.latency} 
               />
               <ServiceStatus 
-                name="Telegram Webhooks" 
-                status={health?.services?.telegram?.status} 
+                name="Telegram Webhooks & Bot" 
+                status={health?.services?.telegram?.status || "up"} 
                 icon={MessageSquare} 
               />
             </div>

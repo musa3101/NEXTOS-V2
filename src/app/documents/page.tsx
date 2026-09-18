@@ -37,24 +37,22 @@ export default function DocumentsPage() {
     },
   });
 
-  const { data: clients } = useQuery({
+  const { data: clients, isLoading: clientsLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
       const res = await fetch("/api/clients");
       if (!res.ok) throw new Error("Failed to fetch clients");
       return res.json();
     },
-    enabled: isCreateOpen,
   });
 
-  const { data: projects } = useQuery({
+  const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       const res = await fetch("/api/projects");
       if (!res.ok) throw new Error("Failed to fetch projects");
       return res.json();
     },
-    enabled: isCreateOpen,
   });
 
   const handleDownload = (id: string, number: string) => {
@@ -204,9 +202,11 @@ export default function DocumentsPage() {
                 <DocumentForm 
                   clients={clients || []} 
                   projects={projects || []} 
+                  isLoadingClients={clientsLoading}
                   onSuccess={() => {
                     setIsCreateOpen(false);
                     queryClient.invalidateQueries({ queryKey: ["documents"] });
+                    queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
                   }} 
                 />
               </div>
@@ -221,10 +221,11 @@ export default function DocumentsPage() {
 interface DocumentFormProps {
   clients: any[];
   projects: any[];
+  isLoadingClients?: boolean;
   onSuccess: () => void;
 }
 
-function DocumentForm({ clients, projects, onSuccess }: DocumentFormProps) {
+function DocumentForm({ clients, projects, isLoadingClients, onSuccess }: DocumentFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -411,7 +412,9 @@ function DocumentForm({ clients, projects, onSuccess }: DocumentFormProps) {
             required
             className="flex h-10 w-full rounded-md border border-[#333] bg-[#1A1A1A] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#D4A853]"
           >
-            <option value="">-- Seleccionar --</option>
+            <option value="">
+              {isLoadingClients ? "-- Cargando clientes... --" : clients.length === 0 ? "-- No hay clientes (sincroniza en Clientes) --" : "-- Seleccionar cliente --"}
+            </option>
             {clients.map(c => (
               <option key={c.id} value={c.id}>{c.name} {c.company ? `(${c.company})` : ""}</option>
             ))}
@@ -427,7 +430,8 @@ function DocumentForm({ clients, projects, onSuccess }: DocumentFormProps) {
             className="flex h-10 w-full rounded-md border border-[#333] bg-[#1A1A1A] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#D4A853] disabled:opacity-50"
           >
             <option value="">-- Ninguno / General --</option>
-            {filteredProjects.map(p => (
+            {/* Show matching client projects first, or fallback to all projects if unassigned */}
+            {(filteredProjects.length > 0 ? filteredProjects : projects).map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>

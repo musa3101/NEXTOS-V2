@@ -16,7 +16,9 @@ import {
   Mail, 
   ShieldCheck, 
   FileText,
-  UserCheck
+  UserCheck,
+  RefreshCw,
+  CheckCircle2
 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 
@@ -24,9 +26,11 @@ export default function ClientsPage() {
   const [search, setSearch] = useState("");
   const [onlyCloudflare, setOnlyCloudflare] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: clients, isLoading } = useQuery({
+  const { data: clients, isLoading, refetch } = useQuery({
     queryKey: ["clients", search],
     queryFn: async () => {
       const res = await fetch(`/api/clients${search ? `?search=${search}` : ""}`);
@@ -34,6 +38,23 @@ export default function ClientsPage() {
       return res.json();
     },
   });
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    setSyncFeedback(null);
+    try {
+      await fetch("/api/clients");
+      await refetch();
+      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      setSyncFeedback("¡Sincronizado con éxito!");
+    } catch (err) {
+      setSyncFeedback("Error al sincronizar");
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncFeedback(null), 3500);
+    }
+  };
 
   // Filter clients to show only those with active Cloudflare pages if checked
   const filteredClients = (clients || []).filter((client: any) => {
@@ -67,15 +88,33 @@ export default function ClientsPage() {
             <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-xl">Clientes</h1>
             <p className="text-[#d1d1d1] text-sm mt-0.5 drop-shadow-lg">Administra los perfiles de clientes y sincronización con Cloudflare.</p>
           </div>
-          <Button 
-            onClick={() => setIsFormOpen(!isFormOpen)} 
-            className="bg-[#D4A853] hover:bg-[#c39742] active:scale-[0.98] text-black font-semibold shadow-lg shadow-[#D4A853]/10 hover:shadow-[#D4A853]/25 transition-all duration-300 rounded-xl cursor-pointer"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            {isFormOpen ? "Cerrar Formulario" : "Nuevo Cliente"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="bg-black/40 hover:bg-black/60 border border-white/10 text-white text-xs font-semibold rounded-xl h-10 px-3.5 cursor-pointer disabled:opacity-50 shadow-sm"
+              title="Sincronizar proyectos de Cloudflare con la base de datos"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-2 text-[#F38020] ${isSyncing ? "animate-spin" : ""}`} />
+              {isSyncing ? "Sincronizando..." : "Sincronizar Cloudflare"}
+            </Button>
+            <Button 
+              onClick={() => setIsFormOpen(!isFormOpen)} 
+              className="bg-[#D4A853] hover:bg-[#c39742] active:scale-[0.98] text-black font-semibold shadow-lg shadow-[#D4A853]/10 hover:shadow-[#D4A853]/25 transition-all duration-300 rounded-xl cursor-pointer h-10"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {isFormOpen ? "Cerrar Formulario" : "Nuevo Cliente"}
+            </Button>
+          </div>
         </div>
       </div>
+      {syncFeedback && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>{syncFeedback}</span>
+        </div>
+      )}
 
       {isFormOpen && (
         <div className="relative overflow-hidden rounded-xl border border-[#333] shadow-lg animate-in slide-in-from-top-2 duration-300">
@@ -155,7 +194,16 @@ export default function ClientsPage() {
                         <div className="flex flex-col items-center justify-center gap-2">
                           <Globe className="w-8 h-8 text-[#555] animate-pulse" />
                           <p className="text-sm font-semibold drop-shadow-md">No se encontraron clientes activos.</p>
-                          <p className="text-xs text-[#999]">Intenta desactivando el filtro de Cloudflare.</p>
+                          <p className="text-xs text-[#999]">Intenta desactivando el filtro de Cloudflare o sincroniza tus proyectos.</p>
+                          <Button
+                            variant="secondary"
+                            onClick={handleSync}
+                            disabled={isSyncing}
+                            className="mt-3 bg-[#D4A853] hover:bg-[#c39742] text-black font-semibold text-xs rounded-xl h-9 px-4 cursor-pointer"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
+                            Sincronizar proyectos de Cloudflare ahora
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -172,8 +220,15 @@ export default function ClientsPage() {
                         const subdomainMatch = cfProj.description.match(/Subdomain: ([^\s]+)/);
                         subdomain = subdomainMatch ? subdomainMatch[1] : null;
                       }
+                      if (!subdomain && cfProj?.name) {
+                        subdomain = `${cfProj.name}.pages.dev`;
+                      }
+                      // Known custom domains
+                      const cleanProjName = (cfProj?.name || "").toLowerCase();
+                      if (cleanProjName === "mynextbymusa") subdomain = "mynextbymusa.com";
+                      if (cleanProjName === "ecuaplac") subdomain = "ecuaplac.com";
 
-                      const isCFActive = cfProj?.status === "published";
+                      const isCFActive = cfProj?.status === "published" || !!cfProj;
 
                       return (
                         <TableRow key={client.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-300">

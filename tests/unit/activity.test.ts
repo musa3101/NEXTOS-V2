@@ -8,8 +8,8 @@ const { mockInsert, mockFrom } = vi.hoisted(() => {
   return { mockInsert, mockFrom };
 });
 
-vi.mock("@/lib/supabase/server", () => ({
-  supabaseAdmin: {
+vi.mock("@/lib/insforge/server", () => ({
+  insforgeAdmin: {
     from: mockFrom,
   },
 }));
@@ -21,7 +21,7 @@ describe("Activity Logger (src/lib/activity.ts)", () => {
     vi.clearAllMocks();
   });
 
-  it("inserts activity log record to supabaseAdmin with correct payload", async () => {
+  it("inserts activity log record to insforgeAdmin with correct payload", async () => {
     await logActivity({
       action: "DEPLOY_TRIGGERED",
       entityType: "project",
@@ -31,13 +31,13 @@ describe("Activity Logger (src/lib/activity.ts)", () => {
     });
 
     expect(mockFrom).toHaveBeenCalledWith("activity_logs");
-    expect(mockInsert).toHaveBeenCalledWith({
+    expect(mockInsert).toHaveBeenCalledWith([{
       action: "DEPLOY_TRIGGERED",
       entity_type: "project",
       entity_id: "prj_123",
       details: { environment: "production" },
       source: "web",
-    });
+    }]);
   });
 
   it("uses default values for details and source", async () => {
@@ -46,16 +46,16 @@ describe("Activity Logger (src/lib/activity.ts)", () => {
       entityType: "system",
     });
 
-    expect(mockInsert).toHaveBeenCalledWith({
+    expect(mockInsert).toHaveBeenCalledWith([{
       action: "PING_TEST",
       entity_type: "system",
       entity_id: undefined,
       details: {},
       source: "web",
-    });
+    }]);
   });
 
-  it("catches and logs error without crashing when Supabase returns an error", async () => {
+  it("catches and logs error without crashing when InsForge returns an error", async () => {
     mockInsert.mockResolvedValueOnce({ error: { message: "Database connection failed" } });
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
