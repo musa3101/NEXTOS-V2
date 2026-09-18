@@ -129,45 +129,63 @@ export default function DocumentsPage() {
             <div className="p-16 flex items-center justify-center">
               <Loader size={1.0} />
             </div>
+          ) : documents?.length === 0 ? (
+            <div className="p-8 text-center text-[#c9c9c9] drop-shadow-md">No hay documentos generados.</div>
           ) : (
-            <Table>
-              <TableHeader className="bg-black/20">
-                <TableRow className="border-b border-white/10 hover:bg-transparent">
-                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Número</TableHead>
-                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Tipo</TableHead>
-                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Cliente</TableHead>
-                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Fecha</TableHead>
-                  <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 text-right drop-shadow-md">PDF</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {documents?.length === 0 ? (
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={5} className="text-center py-8 text-[#c9c9c9] drop-shadow-md">
-                      No hay documentos generados.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  documents?.map((doc: any) => (
-                    <TableRow key={doc.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-300">
-                      <TableCell className="font-medium text-white drop-shadow-md">{doc.number}</TableCell>
-                      <TableCell>
-                        <Badge variant={doc.type === "invoice" ? "warning" : "info"} className="backdrop-blur-sm">
-                          {doc.type === "invoice" ? "Factura" : "Entrega"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-[#ccc] drop-shadow-sm">{doc.clients?.name || "-"}</TableCell>
-                      <TableCell className="text-[#ccc] drop-shadow-sm">{new Date(doc.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id, doc.number)} className="bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white">
-                          <Download className="w-4 h-4 mr-2" /> Descargar
-                        </Button>
-                      </TableCell>
+            <>
+              {/* Mobile: card list (hidden on md+) */}
+              <div className="md:hidden divide-y divide-white/5">
+                {documents?.map((doc: any) => (
+                  <div key={doc.id} className="p-4 flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-white text-sm truncate">{doc.number}</span>
+                      <Badge variant={doc.type === "invoice" ? "warning" : "info"} className="backdrop-blur-sm shrink-0">
+                        {doc.type === "invoice" ? "Factura" : "Entrega"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-[#A3A3A3]">{doc.clients?.name || "-"} · {new Date(doc.created_at).toLocaleDateString()}</span>
+                      <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id, doc.number)} className="bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white shrink-0 text-xs h-8 px-3">
+                        <Download className="w-3.5 h-3.5 mr-1.5" /> PDF
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Desktop: table (hidden on mobile) */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader className="bg-black/20">
+                    <TableRow className="border-b border-white/10 hover:bg-transparent">
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Número</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Tipo</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Cliente</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Fecha</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 text-right drop-shadow-md">PDF</TableHead>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {documents?.map((doc: any) => (
+                      <TableRow key={doc.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-300">
+                        <TableCell className="font-medium text-white drop-shadow-md">{doc.number}</TableCell>
+                        <TableCell>
+                          <Badge variant={doc.type === "invoice" ? "warning" : "info"} className="backdrop-blur-sm">
+                            {doc.type === "invoice" ? "Factura" : "Entrega"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-[#ccc] drop-shadow-sm">{doc.clients?.name || "-"}</TableCell>
+                        <TableCell className="text-[#ccc] drop-shadow-sm">{new Date(doc.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id, doc.number)} className="bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white">
+                            <Download className="w-4 h-4 mr-2" /> Descargar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -472,8 +490,8 @@ function DocumentForm({ clients, projects, isLoadingClients, onSuccess }: Docume
 
             <div className="space-y-3">
               {invoiceItems.map((item, index) => (
-                <div key={index} className="flex gap-3 items-center bg-[#262626]/30 p-3 rounded-lg border border-[#333]">
-                  <div className="flex-1">
+                <div key={index} className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center bg-[#262626]/30 p-3 rounded-lg border border-[#333]">
+                  <div className="flex-1 min-w-0">
                     <Input 
                       placeholder="Ej. Diseño UI/UX y Wireframing" 
                       value={item.description} 
@@ -482,46 +500,48 @@ function DocumentForm({ clients, projects, isLoadingClients, onSuccess }: Docume
                       required 
                     />
                   </div>
-                  <div className="w-24">
-                    <Input 
-                      type="number" 
-                      placeholder="Cant." 
-                      value={item.quantity} 
-                      onChange={(e) => updateInvoiceItem(index, "quantity", Number(e.target.value))}
-                      className="bg-[#1A1A1A] h-9" 
-                      min="1"
-                      required 
-                    />
+                  <div className="flex gap-2 items-center">
+                    <div className="w-20 sm:w-24">
+                      <Input 
+                        type="number" 
+                        placeholder="Cant." 
+                        value={item.quantity} 
+                        onChange={(e) => updateInvoiceItem(index, "quantity", Number(e.target.value))}
+                        className="bg-[#1A1A1A] h-9" 
+                        min="1"
+                        required 
+                      />
+                    </div>
+                    <div className="flex-1 sm:w-28">
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        placeholder="Precio €" 
+                        value={item.unitPrice} 
+                        onChange={(e) => updateInvoiceItem(index, "unitPrice", Number(e.target.value))}
+                        className="bg-[#1A1A1A] h-9" 
+                        required 
+                      />
+                    </div>
+                    {invoiceItems.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => removeInvoiceItem(index)}
+                        className="text-red-500 hover:text-red-400 hover:bg-red-500/10 h-9 p-2 shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
-                  <div className="w-32">
-                    <Input 
-                      type="number" 
-                      step="0.01"
-                      placeholder="Precio €" 
-                      value={item.unitPrice} 
-                      onChange={(e) => updateInvoiceItem(index, "unitPrice", Number(e.target.value))}
-                      className="bg-[#1A1A1A] h-9" 
-                      required 
-                    />
-                  </div>
-                  {invoiceItems.length > 1 && (
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => removeInvoiceItem(index)}
-                      className="text-red-500 hover:text-red-400 hover:bg-red-500/10 h-9 p-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
                 </div>
               ))}
             </div>
 
             {/* Calculations Box */}
             <div className="flex justify-end pt-4">
-              <div className="bg-[#1A1A1A] border border-[#333] p-4 rounded-lg w-full max-w-xs space-y-2 text-sm text-[#A3A3A3]">
+              <div className="bg-[#1A1A1A] border border-[#333] p-4 rounded-lg w-full sm:max-w-xs space-y-2 text-sm text-[#A3A3A3]">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span className="text-white font-medium">€{subtotal.toFixed(2)}</span>
@@ -586,7 +606,7 @@ function DocumentForm({ clients, projects, isLoadingClients, onSuccess }: Docume
 
             <div className="space-y-3">
               {credentials.map((cred, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 bg-[#262626]/30 p-3 rounded-lg border border-[#333] items-end relative">
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 bg-[#262626]/30 p-3 rounded-lg border border-[#333] items-end relative">
                   <div className="space-y-1">
                     <label className="text-[10px] text-[#A3A3A3] uppercase">Servicio</label>
                     <Input 

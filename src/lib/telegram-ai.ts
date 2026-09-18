@@ -782,3 +782,160 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
       return { error: `Herramienta desconocida: ${name}` };
   }
 }
+
+// ============================================================
+// MULTIMODAL SUPPORT (Images + Voice/Audio)
+// ============================================================
+
+export interface MultimodalInput {
+  type: "image" | "audio";
+  base64DataUri: string;
+  mimeType: string;
+  userText: string;
+}
+
+/**
+ * Handle incoming multimodal message (photo or voice/audio) from Telegram.
+ * Constructs a multimodal content array for Gemini/OpenRouter and processes
+ * the response with full tool calling + memory support.
+ */
+export async function handleTelegramAIMultimodal(
+  chatId: number | string,
+  input: MultimodalInput
+): Promise<void> {
+  const chatIdStr = chatId.toString();
+
+  try {
+    // 1. Save user message to DB (text representation)
+    const messageLabel =
+      input.type === "image"
+        ? `📸 [Imagen] ${input.userText}`
+        : `🎙️ [Audio] ${input.userText}`;
+
+    await (insforgeAdmin.from("telegram_messages") as any).insert([
+      {
+        chat_id: chatIdStr,
+        role: "user",
+        content: messageLabel,
+      },
+    ]);
+
+    // 2. Fetch persistent memories
+    let persistentMemoryText = "";
+    try {
+      const { data: memories } = await (insforgeAdmin.from("telegram_user_memory") as any)
+        .select("memory_text")
+        .eq("chat_id", chatIdStr)
+        .order("created_at", { ascending: true });
+
+      if (memories && memories.length > 0) {
+        persistentMemoryText =
+          "\n\nMEMORIA PERMANENTE RECORDADA SOBRE MUSA Y SU NEGOCIO:\n" +
+          memories.map((m: any) => `• ${m.memory_text}`).join("\n");
+      }
+    } catch (_) {}
+
+    // 3. Fetch recent conversation history (last 20 messages)
+    const { data: historyData } = await (insforgeAdmin.from("telegram_messages") as any)
+      .select("role, content")
+      .eq("chat_id", chatIdStr)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    const history = (historyData || []).reverse().map((m: any) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    }));
+
+    // 4. Build multimodal content for the current message
+    const multimodalContent: any[] = [];
+
+    if (input.type === "image") {
+      multimodalContent.push({
+        type: "image_url",
+        image_url: { url: input.base64DataUri },
+      });
+    } else if (input.type === "audio") {
+      // For audio: Gemini on OpenRouter supports input_audio content parts
+      multimodalContent.push({
+        type: "input_audio",
+        input_audio: {
+          data: input.base64DataUri.split(",")[1] || input.base64DataUri,
+          format: input.mimeType.includes("ogg") ? "ogg" : input.mimeType.includes("mp3") ? "mp3" : "wav",
+        },
+      });
+    }
+
+    // Always include the user text alongside the media
+    multimodalContent.push({
+      type: "text",
+      text: input.userText,
+    });
+
+    // 5. Assemble messages for LLM
+    const messages: any[] = [
+      { role: "system", content: SYSTEM_PROMPT + persistentMemoryText },
+      ...history.slice(0, -1), // History except the last (which is the current multimodal message label)
+      {
+        role: "user",
+        content: multimodalContent,
+      },
+    ];
+
+    // 6. Call OpenRouter AI (with tools)
+    const completion = await callOpenRouter(messages, AI_TOOLS);
+    const choice = completion.choices?.[0];
+    const assistantMessage = choice?.message;
+
+    if (!assistantMessage) {
+      await sendMessage(chatId, "⚠️ No pude procesar tu mensaje en este momento. Inténtalo de nuevo.");
+      return;
+    }
+
+    // 7. Handle tool calls (same flow as text messages)
+    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      messages.push(assistantMessage);
+
+      for (const toolCall of assistantMessage.tool_calls) {
+        const functionName = toolCall.function.name;
+        let args: any = {};
+        try {
+          args = JSON.parse(toolCall.function.arguments || "{}");
+        } catch (_) {}
+
+        const toolResult = await executeTool(functionName, args, chatId);
+        messages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: JSON.stringify(toolResult),
+        });
+      }
+
+      // Second call for final conversational response
+      const secondCompletion = await callOpenRouter(messages);
+      const finalContent = secondCompletion.choices?.[0]?.message?.content || "✅ Acción completada.";
+
+      await (insforgeAdmin.from("telegram_messages") as any).insert([
+        { chat_id: chatIdStr, role: "assistant", content: finalContent },
+      ]);
+
+      await sendMessage(chatId, finalContent);
+      return;
+    }
+
+    // 8. Direct conversational reply
+    const replyContent = assistantMessage.content || "Entendido, Musa. ¿En qué más puedo ayudarte?";
+
+    await (insforgeAdmin.from("telegram_messages") as any).insert([
+      { chat_id: chatIdStr, role: "assistant", content: replyContent },
+    ]);
+
+    await sendMessage(chatId, replyContent);
+  } catch (error: any) {
+    console.error("Error in handleTelegramAIMultimodal:", error);
+    await sendMessage(
+      chatId,
+      `❌ Error al procesar el ${input.type === "image" ? "imagen" : "audio"}: ${error.message || "Error desconocido"}`
+    );
+  }
+}

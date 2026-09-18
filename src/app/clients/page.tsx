@@ -88,7 +88,7 @@ export default function ClientsPage() {
             <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-xl">Clientes</h1>
             <p className="text-[#d1d1d1] text-sm mt-0.5 drop-shadow-lg">Administra los perfiles de clientes y sincronización con Cloudflare.</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Button
               variant="secondary"
               onClick={handleSync}
@@ -97,14 +97,14 @@ export default function ClientsPage() {
               title="Sincronizar proyectos de Cloudflare con la base de datos"
             >
               <RefreshCw className={`w-3.5 h-3.5 mr-2 text-[#F38020] ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Sincronizando..." : "Sincronizar Cloudflare"}
+              {isSyncing ? "Sincronizando..." : "Sincronizar"}
             </Button>
             <Button 
               onClick={() => setIsFormOpen(!isFormOpen)} 
               className="bg-[#D4A853] hover:bg-[#c39742] active:scale-[0.98] text-black font-semibold shadow-lg shadow-[#D4A853]/10 hover:shadow-[#D4A853]/25 transition-all duration-300 rounded-xl cursor-pointer h-10"
             >
               <Plus className="w-4 h-4 mr-2" />
-              {isFormOpen ? "Cerrar Formulario" : "Nuevo Cliente"}
+              {isFormOpen ? "Cerrar" : "Nuevo Cliente"}
             </Button>
           </div>
         </div>
@@ -174,108 +174,127 @@ export default function ClientsPage() {
               <Loader size={1.1} />
               <span className="text-xs text-[#c9c9c9] font-bold uppercase tracking-wider animate-pulse drop-shadow-md mt-2">Sincronizando con Cloudflare...</span>
             </div>
+          ) : filteredClients.length === 0 ? (
+            <div className="p-12 flex flex-col items-center justify-center gap-2 text-center">
+              <Globe className="w-8 h-8 text-[#555] animate-pulse" />
+              <p className="text-sm font-semibold text-[#c9c9c9] drop-shadow-md">No se encontraron clientes activos.</p>
+              <p className="text-xs text-[#999]">Intenta desactivando el filtro o sincroniza tus proyectos.</p>
+              <Button
+                variant="secondary"
+                onClick={handleSync}
+                disabled={isSyncing}
+                className="mt-3 bg-[#D4A853] hover:bg-[#c39742] text-black font-semibold text-xs rounded-xl h-9 px-4 cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
+                Sincronizar proyectos de Cloudflare ahora
+              </Button>
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-black/20">
-                  <TableRow className="border-b border-white/10 hover:bg-transparent">
-                    <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Cliente</TableHead>
-                    <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Empresa</TableHead>
-                    <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Email</TableHead>
-                    <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Sitio Web (CF)</TableHead>
-                    <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Estado CF</TableHead>
-                    <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 text-right pr-6 drop-shadow-md">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredClients.length === 0 ? (
-                    <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={6} className="text-center py-12 text-[#c9c9c9]">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <Globe className="w-8 h-8 text-[#555] animate-pulse" />
-                          <p className="text-sm font-semibold drop-shadow-md">No se encontraron clientes activos.</p>
-                          <p className="text-xs text-[#999]">Intenta desactivando el filtro de Cloudflare o sincroniza tus proyectos.</p>
-                          <Button
-                            variant="secondary"
-                            onClick={handleSync}
-                            disabled={isSyncing}
-                            className="mt-3 bg-[#D4A853] hover:bg-[#c39742] text-black font-semibold text-xs rounded-xl h-9 px-4 cursor-pointer"
-                          >
-                            <RefreshCw className={`w-3.5 h-3.5 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
-                            Sincronizar proyectos de Cloudflare ahora
-                          </Button>
+            <>
+              {/* Mobile: card list (hidden on md+) */}
+              <div className="md:hidden divide-y divide-white/5">
+                {filteredClients.map((client: any) => {
+                  const cfProj = client.projects?.find((p: any) =>
+                    p.status === "published" ||
+                    (p.description && p.description.toLowerCase().includes("cloudflare"))
+                  );
+                  let subdomain = null;
+                  if (cfProj?.description) {
+                    const subdomainMatch = cfProj.description.match(/Subdomain: ([^\s]+)/);
+                    subdomain = subdomainMatch ? subdomainMatch[1] : null;
+                  }
+                  if (!subdomain && cfProj?.name) subdomain = `${cfProj.name}.pages.dev`;
+                  const cleanProjName = (cfProj?.name || "").toLowerCase();
+                  if (cleanProjName === "mynextbymusa") subdomain = "mynextbymusa.com";
+                  if (cleanProjName === "ecuaplac") subdomain = "ecuaplac.com";
+                  const isCFActive = cfProj?.status === "published" || !!cfProj;
+
+                  return (
+                    <div key={client.id} className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-black/40 border border-[#D4A853]/30 text-[#D4A853] flex items-center justify-center font-bold text-sm shrink-0">
+                        {client.name.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-white truncate">{client.name}</span>
+                          {isCFActive ? (
+                            <Badge variant="success" className="text-[9px] uppercase font-bold py-0 px-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 shrink-0">Activo</Badge>
+                          ) : (
+                            <Badge variant="warning" className="text-[9px] uppercase font-bold py-0 px-2 rounded-full border border-amber-500/20 bg-amber-500/10 shrink-0">Lead</Badge>
+                          )}
                         </div>
-                      </TableCell>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          {client.company && <span className="text-xs text-[#888]">{client.company}</span>}
+                          {subdomain && (
+                            <a href={`https://${subdomain}`} target="_blank" rel="noreferrer"
+                              className="text-[11px] text-[#D4A853] font-semibold truncate flex items-center gap-1">
+                              <Globe className="w-3 h-3 shrink-0" />
+                              <span className="truncate max-w-[140px]">{subdomain}</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Desktop: full table (hidden on mobile) */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-black/20">
+                    <TableRow className="border-b border-white/10 hover:bg-transparent">
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Cliente</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Empresa</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Email</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Sitio Web (CF)</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 drop-shadow-md">Estado CF</TableHead>
+                      <TableHead className="text-white font-bold text-xs uppercase tracking-wider py-4 text-right pr-6 drop-shadow-md">Acciones</TableHead>
                     </TableRow>
-                  ) : (
-                    filteredClients.map((client: any) => {
-                      // Extract active Cloudflare project link & subdomain
-                      const cfProj = client.projects?.find((p: any) => 
-                        p.status === "published" || 
+                  </TableHeader>
+                  <TableBody>
+                    {filteredClients.map((client: any) => {
+                      const cfProj = client.projects?.find((p: any) =>
+                        p.status === "published" ||
                         (p.description && p.description.toLowerCase().includes("cloudflare"))
                       );
-
                       let subdomain = null;
                       if (cfProj?.description) {
                         const subdomainMatch = cfProj.description.match(/Subdomain: ([^\s]+)/);
                         subdomain = subdomainMatch ? subdomainMatch[1] : null;
                       }
-                      if (!subdomain && cfProj?.name) {
-                        subdomain = `${cfProj.name}.pages.dev`;
-                      }
-                      // Known custom domains
+                      if (!subdomain && cfProj?.name) subdomain = `${cfProj.name}.pages.dev`;
                       const cleanProjName = (cfProj?.name || "").toLowerCase();
                       if (cleanProjName === "mynextbymusa") subdomain = "mynextbymusa.com";
                       if (cleanProjName === "ecuaplac") subdomain = "ecuaplac.com";
-
                       const isCFActive = cfProj?.status === "published" || !!cfProj;
 
                       return (
                         <TableRow key={client.id} className="border-b border-white/5 hover:bg-white/5 transition-all duration-300">
-                          {/* Name & Initials Badge */}
                           <TableCell className="font-semibold text-white py-4 pl-6 flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-black/40 backdrop-blur-md border border-[#D4A853]/30 text-[#D4A853] flex items-center justify-center font-bold text-sm shadow-inner shrink-0">
                               {client.name.substring(0, 2).toUpperCase()}
                             </div>
                             <div>
                               <span className="block text-sm font-bold text-white leading-none drop-shadow-md">{client.name}</span>
-                              <span className="text-[10px] text-[#bbb] mt-1 block uppercase tracking-wider font-semibold">
-                                ID: {client.id.substring(0, 8)}
-                              </span>
+                              <span className="text-[10px] text-[#bbb] mt-1 block uppercase tracking-wider font-semibold">ID: {client.id.substring(0, 8)}</span>
                             </div>
                           </TableCell>
-
-                          {/* Company */}
                           <TableCell className="py-4 text-sm font-medium text-[#ddd] drop-shadow-sm">{client.company || "-"}</TableCell>
-
-                          {/* Email */}
                           <TableCell className="py-4">
                             {client.email ? (
                               <a href={`mailto:${client.email}`} className="text-sm text-[#bbb] hover:text-[#D4A853] transition-colors flex items-center gap-1.5 w-fit drop-shadow-sm">
                                 <Mail className="w-3.5 h-3.5 shrink-0" /> {client.email}
                               </a>
-                            ) : (
-                              <span className="text-sm text-[#555]">-</span>
-                            )}
+                            ) : <span className="text-sm text-[#555]">-</span>}
                           </TableCell>
-
-                          {/* Cloudflare Pages Subdomain Link */}
                           <TableCell className="py-4">
                             {subdomain ? (
-                              <a 
-                                href={`https://${subdomain}`} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="text-xs text-[#D4A853] hover:underline font-bold flex items-center gap-1 w-fit group/link drop-shadow-md"
-                              >
+                              <a href={`https://${subdomain}`} target="_blank" rel="noreferrer"
+                                className="text-xs text-[#D4A853] hover:underline font-bold flex items-center gap-1 w-fit group/link drop-shadow-md">
                                 <Globe className="w-3.5 h-3.5 text-[#D4A853]/80" /> {subdomain} <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                               </a>
-                            ) : (
-                              <span className="text-xs text-[#666]">No conectado</span>
-                            )}
+                            ) : <span className="text-xs text-[#666]">No conectado</span>}
                           </TableCell>
-
-                          {/* Cloudflare Site Deploy Status Badge */}
                           <TableCell className="py-4">
                             {isCFActive ? (
                               <Badge variant="success" className="text-[10px] uppercase font-bold py-0.5 px-2.5 rounded-full flex items-center gap-1.5 w-fit animate-pulse border border-emerald-500/20 bg-emerald-500/10 backdrop-blur-sm">
@@ -287,20 +306,16 @@ export default function ClientsPage() {
                               </Badge>
                             )}
                           </TableCell>
-
-                          {/* Actions */}
                           <TableCell className="py-4 text-right pr-6">
-                            <Button variant="ghost" size="sm" className="hover:bg-white/10 hover:text-white rounded-lg transition-colors border border-transparent hover:border-white/10 text-xs font-semibold">
-                              Editar
-                            </Button>
+                            <Button variant="ghost" size="sm" className="hover:bg-white/10 hover:text-white rounded-lg transition-colors border border-transparent hover:border-white/10 text-xs font-semibold">Editar</Button>
                           </TableCell>
                         </TableRow>
                       );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </div>
       </div>
