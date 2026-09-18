@@ -20,7 +20,20 @@ export async function sendMessage(chatId: string | number, text: string, parseMo
     });
     
     if (!res.ok) {
-      console.error("Telegram sendMessage failed:", await res.text());
+      const errText = await res.text();
+      console.error("Telegram sendMessage failed:", errText);
+      // Fallback: retry without parse_mode if entity parsing failed
+      if (parseMode && errText.includes("can't parse entities")) {
+        const plainText = text.replace(/<[^>]*>/g, "");
+        return await fetch(`${getTelegramApi()}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: plainText,
+          }),
+        });
+      }
     }
     return res;
   } catch (err) {
