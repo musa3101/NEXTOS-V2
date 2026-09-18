@@ -17,20 +17,21 @@ export async function GET(request: Request) {
     const res = await fetch(targetUrl, {
       method: "GET",
       headers: {
-        "User-Agent": "MyNext-OS-Health-Checker/2.0",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
       signal: controller.signal,
       cache: "no-store",
     });
 
     clearTimeout(timeoutId);
-    const latency = Math.round(performance.now() - startTime);
+    let latency = Math.round(performance.now() - startTime);
 
-    const isOk = res.ok;
-    const statusCode = res.status;
-    const serverHeader = res.headers.get("server") || "Cloudflare Edge";
-    const contentType = res.headers.get("content-type") || "text/html";
-    const cfRay = res.headers.get("cf-ray") || null;
+    let isOk = res.ok;
+    let statusCode = res.status;
+    let serverHeader = res.headers.get("server") || "Cloudflare Edge";
+    let contentType = res.headers.get("content-type") || "text/html";
+    let cfRay = res.headers.get("cf-ray") || null;
 
     // Fetch Cloudflare Pages real project metadata if name is provided
     let cfDetails: any = null;

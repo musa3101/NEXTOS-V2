@@ -5,7 +5,10 @@ import { generateInvoicePdf, generateDeliveryPdf, generateProposalPdf } from "@/
 import { logActivity } from "@/lib/activity";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const DEFAULT_MODEL = process.env.OPENROUTER_CHAT_MODEL || "google/gemini-2.5-flash";
+// Primary model: gemini-2.5-flash (ultra fast, high reasoning, excellent tool calling)
+// Fallbacks: meta-llama/llama-3.3-70b-instruct (free/powerful), deepseek/deepseek-chat
+const PRIMARY_MODEL = process.env.OPENROUTER_CHAT_MODEL || "google/gemini-2.5-flash";
+const FALLBACK_MODEL = "meta-llama/llama-3.3-70b-instruct";
 
 // Tool schemas for OpenRouter function calling
 const AI_TOOLS = [
@@ -17,6 +20,23 @@ const AI_TOOLS = [
       parameters: {
         type: "object",
         properties: {},
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "remember_user_fact",
+      description: "Guarda un dato, preferencia o instrucción permanente sobre Musa, su negocio, sus clientes o acuerdos para recordarlo siempre en futuras conversaciones.",
+      parameters: {
+        type: "object",
+        properties: {
+          fact: {
+            type: "string",
+            description: "Información importante que Musa quiere que recuerdes siempre (ej: 'El NIF de Musa es 12345678Z', 'A Pedro le aplicamos 15% de descuento', etc.).",
+          },
+        },
+        required: ["fact"],
       },
     },
   },
@@ -160,7 +180,7 @@ const AI_TOOLS = [
   },
 ];
 
-// System Prompt configuring the conversational persona
+// Base System Prompt
 const SYSTEM_PROMPT = `Eres el Asistente de Inteligencia Artificial de NextOS y MyNext, diseñado exclusivamente para Musa.
 Tu propósito es actuar como su copiloto ejecutivo, conversacional, eficiente y proactivo en Telegram.
 
@@ -175,6 +195,7 @@ COMPORTAMIENTO Y TONO:
   -> Ejecuta la herramienta correspondiente ('create_invoice', 'create_proposal', 'get_system_health', etc.).
   -> Las herramientas de PDF generarán el documento automáticamente y lo enviarán como archivo adjunto a su Telegram.
   -> Tras ejecutar la herramienta, confírmaselo a Musa con un breve resumen amigable y los datos clave (número de documento, importe total, etc.).
+- Si Musa te comparte un dato importante sobre él, su empresa o un cliente (ej: "Acuérdate de que mi NIF es...", "Recuerda que Pedro paga a 60 días"), usa la herramienta 'remember_user_fact' para guardarlo en tu memoria permanente.
 - Respeta la brevedad adecuada para mensajería de Telegram: mensajes claros, sin rodeos innecesarios y formateados de manera limpia.`;
 
 /**
@@ -184,7 +205,7 @@ export async function handleTelegramAI(chatId: number | string, userText: string
   const chatIdStr = chatId.toString();
 
   try {
-    // 1. Save user message to InsForge database for conversation history
+    // 1. Save user message to InsForge database
     await (insforgeAdmin.from("telegram_messages") as any).insert([
       {
         chat_id: chatIdStr,
@@ -193,30 +214,44 @@ export async function handleTelegramAI(chatId: number | string, userText: string
       },
     ]);
 
-    // 2. Fetch recent conversation history (last 8 messages)
+    // 2. Fetch persistent durable memories for this chat
+    let persistentMemoryText = "";
+    try {
+      const { data: memories } = await (insforgeAdmin.from("telegram_user_memory") as any)
+        .select("memory_text")
+        .eq("chat_id", chatIdStr)
+        .order("created_at", { ascending: true });
+
+      if (memories && memories.length > 0) {
+        persistentMemoryText =
+          "\n\nMEMORIA PERMANENTE RECORDADA SOBRE MUSA Y SU NEGOCIO:\n" +
+          memories.map((m: any, i: number) => `• ${m.memory_text}`).join("\n");
+      }
+    } catch (_) {}
+
+    // 3. Fetch recent conversation history (last 20 messages for rich conversational context)
     const { data: historyData } = await (insforgeAdmin.from("telegram_messages") as any)
       .select("role, content")
       .eq("chat_id", chatIdStr)
       .order("created_at", { ascending: false })
-      .limit(8);
+      .limit(20);
 
     const history = (historyData || []).reverse().map((m: any) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     }));
 
-    // 3. Assemble messages for LLM
+    // 4. Assemble messages for LLM
     const messages: any[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: SYSTEM_PROMPT + persistentMemoryText },
       ...history,
     ];
 
-    // If history didn't include the current user message (e.g. race condition), ensure it's present
     if (messages[messages.length - 1]?.content !== userText) {
       messages.push({ role: "user", content: userText });
     }
 
-    // 4. Call OpenRouter AI
+    // 5. Call OpenRouter AI
     const completion = await callOpenRouter(messages, AI_TOOLS);
     const choice = completion.choices?.[0];
     const assistantMessage = choice?.message;
@@ -226,7 +261,7 @@ export async function handleTelegramAI(chatId: number | string, userText: string
       return;
     }
 
-    // 5. Check if model decided to call tools
+    // 6. Check if model decided to call tools
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
       messages.push(assistantMessage);
 
@@ -265,7 +300,7 @@ export async function handleTelegramAI(chatId: number | string, userText: string
       return;
     }
 
-    // Direct conversational reply (e.g., asking for missing info or casual conversation)
+    // Direct conversational reply
     const replyContent = assistantMessage.content || "Entendido, Musa. ¿En qué más puedo ayudarte?";
 
     // Save assistant response to DB
@@ -288,7 +323,7 @@ export async function handleTelegramAI(chatId: number | string, userText: string
 }
 
 /**
- * Call OpenRouter API with fallback support
+ * Call OpenRouter API with automatic model fallback
  */
 async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
   const apiKey = process.env.OPENROUTER_API_KEY || OPENROUTER_API_KEY;
@@ -297,7 +332,7 @@ async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
   }
 
   const payload: any = {
-    model: DEFAULT_MODEL,
+    model: PRIMARY_MODEL,
     messages,
   };
 
@@ -306,24 +341,44 @@ async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
     payload.tool_choice = "auto";
   }
 
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+    "HTTP-Referer": "https://nextos-v2.vercel.app",
+    "X-Title": "NextOS V2 Telegram Assistant",
+  };
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      return await res.json();
+    }
+
+    console.warn(`OpenRouter primary model ${PRIMARY_MODEL} returned ${res.status}, trying fallback ${FALLBACK_MODEL}...`);
+  } catch (e) {
+    console.warn(`OpenRouter primary model error, trying fallback ${FALLBACK_MODEL}:`, e);
+  }
+
+  // Fallback to high-performance model
+  payload.model = FALLBACK_MODEL;
+  const fallbackRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://nextos-v2.vercel.app",
-      "X-Title": "NextOS V2 Telegram Assistant",
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error("OpenRouter API error:", errorBody);
-    throw new Error(`OpenRouter HTTP ${res.status}: ${errorBody}`);
+  if (!fallbackRes.ok) {
+    const errorBody = await fallbackRes.text();
+    console.error("OpenRouter fallback error:", errorBody);
+    throw new Error(`OpenRouter HTTP ${fallbackRes.status}: ${errorBody}`);
   }
 
-  return await res.json();
+  return await fallbackRes.json();
 }
 
 /**
@@ -331,18 +386,94 @@ async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
  */
 async function executeTool(name: string, args: any, chatId: number | string): Promise<any> {
   switch (name) {
+    case "remember_user_fact": {
+      try {
+        await (insforgeAdmin.from("telegram_user_memory") as any).insert([
+          {
+            chat_id: chatId.toString(),
+            memory_text: args.fact,
+          },
+        ]);
+        return { success: true, saved: args.fact };
+      } catch (err: any) {
+        return { success: false, error: err.message };
+      }
+    }
+
     case "get_system_health": {
       try {
         const projects = await getCloudflareProjects();
+        const browserHeaders = {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        };
+
         const siteResults = await Promise.all(
           (projects || []).map(async (project) => {
             const { url, displayDomain } = getPrimaryProjectUrl(project);
+            const defaultUrl = `https://${project.subdomain || project.domains?.[0] || `${project.name}.pages.dev`}`;
             const start = Date.now();
+
             try {
-              const res = await fetch(url, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(6000) });
-              return { name: project.name, domain: displayDomain, ok: res.ok, status: res.status, latency: Date.now() - start };
+              let res = await fetch(url, {
+                method: "GET",
+                headers: browserHeaders,
+                cache: "no-store",
+                signal: AbortSignal.timeout(7000),
+              });
+
+              // If custom domain is challenged with 403 by Cloudflare WAF on datacenter IP, check pages.dev
+              if (res.status === 403 && url !== defaultUrl) {
+                try {
+                  const fallbackRes = await fetch(defaultUrl, {
+                    method: "GET",
+                    headers: browserHeaders,
+                    cache: "no-store",
+                    signal: AbortSignal.timeout(5000),
+                  });
+                  if (fallbackRes.ok) {
+                    res = fallbackRes;
+                  }
+                } catch (_) {}
+              }
+
+              return {
+                name: project.name,
+                domain: displayDomain,
+                ok: res.ok,
+                status: res.status,
+                latency: Date.now() - start,
+              };
             } catch (e: any) {
-              return { name: project.name, domain: displayDomain, ok: false, status: 0, latency: Date.now() - start, error: e.message };
+              // Fallback check on network/abort error
+              if (url !== defaultUrl) {
+                try {
+                  const fallbackRes = await fetch(defaultUrl, {
+                    method: "GET",
+                    headers: browserHeaders,
+                    cache: "no-store",
+                    signal: AbortSignal.timeout(5000),
+                  });
+                  if (fallbackRes.ok) {
+                    return {
+                      name: project.name,
+                      domain: displayDomain,
+                      ok: true,
+                      status: 200,
+                      latency: Date.now() - start,
+                    };
+                  }
+                } catch (_) {}
+              }
+
+              return {
+                name: project.name,
+                domain: displayDomain,
+                ok: false,
+                status: 0,
+                latency: Date.now() - start,
+                error: e.message,
+              };
             }
           })
         );

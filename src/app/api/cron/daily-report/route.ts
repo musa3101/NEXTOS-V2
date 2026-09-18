@@ -34,16 +34,37 @@ export async function GET(req: Request) {
         const { url, displayDomain } = getPrimaryProjectUrl(project);
         const startTime = Date.now();
 
+        const defaultUrl = `https://${project.subdomain || project.domains?.[0] || `${project.name}.pages.dev`}`;
+        const browserHeaders = {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        };
+
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-          const res = await fetch(url, {
+          let res = await fetch(url, {
             method: "GET",
-            headers: { "User-Agent": "MyNextOS-DailyCheck/1.0" },
+            headers: browserHeaders,
             signal: controller.signal,
             cache: "no-store",
           });
+
+          // Fallback if custom domain blocked by Cloudflare WAF challenge (403) on datacenter IP
+          if (res.status === 403 && url !== defaultUrl) {
+            try {
+              const fallbackRes = await fetch(defaultUrl, {
+                method: "GET",
+                headers: browserHeaders,
+                signal: AbortSignal.timeout(5000),
+                cache: "no-store",
+              });
+              if (fallbackRes.ok) {
+                res = fallbackRes;
+              }
+            } catch (_) {}
+          }
 
           clearTimeout(timeoutId);
           const latency = Date.now() - startTime;
@@ -57,6 +78,28 @@ export async function GET(req: Request) {
             latency,
           };
         } catch (err: any) {
+          // Fallback on network/abort error to pages.dev
+          if (url !== defaultUrl) {
+            try {
+              const fallbackRes = await fetch(defaultUrl, {
+                method: "GET",
+                headers: browserHeaders,
+                signal: AbortSignal.timeout(5000),
+                cache: "no-store",
+              });
+              if (fallbackRes.ok) {
+                return {
+                  name: project.name,
+                  domain: displayDomain,
+                  url,
+                  status: fallbackRes.status,
+                  ok: fallbackRes.ok,
+                  latency: Date.now() - startTime,
+                };
+              }
+            } catch (_) {}
+          }
+
           const latency = Date.now() - startTime;
           return {
             name: project.name,
