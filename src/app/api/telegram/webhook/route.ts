@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendMessage, sendDocument } from "@/lib/telegram";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { logActivity } from "@/lib/activity";
 
 export async function POST(req: Request) {
@@ -131,7 +131,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
       const start = Date.now();
       let dbStatus = "🔴 Down";
       try {
-        const { error } = await supabaseAdmin.from("clients").select("id").limit(1);
+        const { error } = await insforgeAdmin.from("clients").select("id").limit(1);
         if (!error) dbStatus = "🟢 Up";
       } catch (e) {}
       const latency = Date.now() - start;
@@ -147,7 +147,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
       break;
 
     case "/clientes":
-      const { data: clients } = await supabaseAdmin.from("clients").select("name, company, status").eq("status", "active");
+      const { data: clients } = await insforgeAdmin.from("clients").select("name, company, status").eq("status", "active");
       if (!clients || clients.length === 0) {
         await sendMessage(chatId, "No hay clientes activos.");
         break;
@@ -158,7 +158,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
       break;
 
     case "/proyectos":
-      const { data: projects } = await supabaseAdmin.from("projects").select("name, clients(name)").eq("status", "development");
+      const { data: projects } = await insforgeAdmin.from("projects").select("name, clients(name)").eq("status", "development");
       if (!projects || projects.length === 0) {
         await sendMessage(chatId, "No hay proyectos en desarrollo.");
         break;
@@ -174,7 +174,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
         break;
       }
       const search = args.join(" ");
-      const { data: searchResults } = await supabaseAdmin
+      const { data: searchResults } = await insforgeAdmin
         .from("clients")
         .select("*")
         .ilike("name", `%${search}%`)
@@ -212,7 +212,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetQuery);
 
         if (isUuid) {
-          const { data, error } = await supabaseAdmin
+          const { data, error } = await insforgeAdmin
             .from("documents")
             .select("*, clients(name, company), projects(name)")
             .eq("id", targetQuery)
@@ -222,7 +222,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
           }
         } else {
           // Resolve client by name
-          const { data: clientData } = await supabaseAdmin
+          const { data: clientData } = await insforgeAdmin
             .from("clients")
             .select("id")
             .ilike("name", `%${targetQuery}%`)
@@ -232,7 +232,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
           if (clientData) {
             const client = clientData as any;
             const docType = command === "/factura" ? "invoice" : "delivery";
-            const { data: docData } = await supabaseAdmin
+            const { data: docData } = await insforgeAdmin
               .from("documents")
               .select("*, clients(name, company), projects(name)")
               .eq("client_id", client.id)
@@ -293,7 +293,7 @@ async function processCommand(command: string, args: string[], chatId: number, a
       await sendMessage(chatId, `⏳ Generando propuesta de demo para "${businessName}"...`);
 
       try {
-        const { data: clientData } = await supabaseAdmin
+        const { data: clientData } = await insforgeAdmin
           .from("clients")
           .select("id")
           .ilike("name", `%${businessName}%`)
@@ -306,16 +306,15 @@ async function processCommand(command: string, args: string[], chatId: number, a
           const client = clientData as any;
           targetClientId = client.id;
         } else {
-          const { data: newClient, error: clientErr } = await supabaseAdmin
-            .from("clients")
-            .insert({ name: businessName, company: businessName, status: "lead" } as any)
-            .select()
-            .single();
+          const { data: newClients, error: clientErr } = await (insforgeAdmin
+            .from("clients") as any)
+            .insert([{ name: businessName, company: businessName, status: "lead" }])
+            .select();
 
-          if (clientErr || !newClient) {
+          if (clientErr || !newClients || newClients.length === 0) {
             throw new Error(`No se pudo crear el cliente en la base de datos: ${clientErr?.message}`);
           }
-          targetClientId = (newClient as any).id;
+          targetClientId = (newClients[0] as any).id;
         }
 
         const year = new Date().getFullYear();
@@ -333,17 +332,16 @@ async function processCommand(command: string, args: string[], chatId: number, a
           }
         };
 
-        const { data: doc, error: docErr } = await supabaseAdmin
-          .from("documents")
-          .insert(payload as any)
-          .select()
-          .single();
+        const { data: docs, error: docErr } = await (insforgeAdmin
+          .from("documents") as any)
+          .insert([payload])
+          .select();
 
-        if (docErr || !doc) {
+        if (docErr || !docs || docs.length === 0) {
           throw new Error(`No se pudo crear el documento en la base de datos: ${docErr?.message}`);
         }
 
-        const docRecord = doc as any;
+        const docRecord = docs[0] as any;
 
         const pdfRes = await fetch(`${apiBaseUrl}/api/documents/${docRecord.id}/pdf`);
         if (!pdfRes.ok) throw new Error("La generación del PDF falló.");

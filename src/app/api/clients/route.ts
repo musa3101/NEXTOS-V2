@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { logActivity } from "@/lib/activity";
 import { syncCloudflareProjectsToClients } from "@/lib/cloudflare-sync";
 
@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     console.error("[GET Clients] Background cloudflare sync failed:", syncErr.message);
   }
 
-  let query = supabaseAdmin.from("clients").select("*").order("created_at", { ascending: false });
+  let query = insforgeAdmin.from("clients").select("*").order("created_at", { ascending: false });
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,company.ilike.%${search}%,email.ilike.%${search}%`);
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   }
 
   // Fetch all projects to map client-projects associations in memory
-  const { data: projects, error: projectsErr } = await supabaseAdmin
+  const { data: projects, error: projectsErr } = await insforgeAdmin
     .from("projects")
     .select("*");
 
@@ -56,24 +56,25 @@ export async function POST(request: Request) {
     }
 
     const payload = { name, company, email, phone, status: status || "lead", notes };
-    const { data, error } = await supabaseAdmin
-      .from("clients")
-      .insert(payload as any)
-      .select()
-      .single();
+    const { data, error } = await (insforgeAdmin
+      .from("clients") as any)
+      .insert([payload])
+      .select();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const record = Array.isArray(data) ? data[0] : data;
+
     await logActivity({
       action: "created",
       entityType: "client",
-      entityId: (data as any)?.id,
-      details: { name: (data as any)?.name },
+      entityId: record?.id,
+      details: { name: record?.name },
     });
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(record, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { generateInvoicePdf, generateDeliveryPdf, generateProposalPdf } from "@/lib/pdf/generate";
 import { logActivity } from "@/lib/activity";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const resolvedParams = await params;
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await insforgeAdmin
       .from("documents")
       .select("*, clients(name, company), projects(name)")
       .eq("id", resolvedParams.id)

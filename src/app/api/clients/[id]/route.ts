@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { logActivity } from "@/lib/activity";
-import { Database } from "@/lib/supabase/types";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await insforgeAdmin
     .from("clients")
     .select("*, projects(*), documents(*)")
     .eq("id", resolvedParams.id)
@@ -24,15 +23,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const body = await request.json();
     
     const updateData = { ...body, updated_at: new Date().toISOString() };
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await insforgeAdmin
       .from("clients")
-      // @ts-ignore
       .update(updateData)
       .eq("id", resolvedParams.id)
       .select()
       .single();
 
-    if (error) {
+  if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -52,7 +50,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await insforgeAdmin
     .from("clients")
     .delete()
     .eq("id", resolvedParams.id)

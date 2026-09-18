@@ -1,42 +1,62 @@
 # Última Sesión - NEXTOS V2
 
-## 📅 Fecha: 2026-08-01
+## 📅 Fecha: 2026-09-18
 
-### 🛠️ Lo realizado hoy:
+### 🛠️ Qué se ha hecho hoy:
 
-1. **Métricas Reales (sin datos falsos)**:
-   - Eliminadas todas las cifras estáticas/inventadas del modal de proyectos.
-   - Conectado el endpoint `/api/cloudflare/project-health` con la API oficial de Cloudflare Pages para obtener datos reales por proyecto: total de despliegues, último commit de GitHub, rama activa, latencia de ping y SSL.
-   - Integrados accesos directos a las consolas oficiales de Microsoft Clarity y Cloudflare Analytics.
+1. **Auditoría completa del backend:**
+   - Detección de fallos en Supabase (falta de tablas del esquema `clients`, `projects`, `documents` y clave `service_role` errónea).
+   - Detección del token de Cloudflare expirado en `.env.local`.
+   - Diagnóstico del bot de Telegram y verificación del webhook en vivo.
 
-2. **Plantillas PDF rediseñadas**:
-   - `InvoiceTemplate`: Réplica del diseño de `ECUAPLAC-FACTURA.pdf` (fondo marfil, tabla con cabecera negra, caja de pago Revolut con IBAN real, marca MYNEXT).
-   - `DeliveryTemplate`: Réplica del diseño de `PDF-PARA-CLIENTES.pdf` (fondo negro luxury, botón dorado "ACCEDER A LA DEMO", soporte bilingüe ES/EN).
+2. **Migración completa a InsForge:**
+   - Creado proyecto oficial `nextos-v2` en InsForge (región `eu-central`).
+   - Aplicada la migración SQL (`migrations/20260918161646_init-schema.sql`) creando las 4 tablas en PostgreSQL: `clients`, `projects`, `documents`, `activity_logs` con RLS y triggers.
+   - Instalado `@insforge/sdk@latest` y eliminado `@supabase/supabase-js`.
+   - Creada la capa de conexión en `src/lib/insforge/` (`client.ts` y `server.ts` con `createAdminClient`).
+   - Mantenida capa retrocompatible en `src/lib/supabase/` para redirigir a InsForge sin romper código existente.
 
-3. **Barra de navegación iPhone mejorada**:
-   - Safe area con `env(safe-area-inset-bottom)` para que no choque con el Home indicator del iPhone.
-   - Tab activo con borde dorado y fondo premium.
+3. **Adaptación de Rutas API:**
+   - Adaptados los endpoints `/api/clients`, `/api/projects`, `/api/documents`, `/api/activity`, `/api/dashboard`, `/api/health`, el webhook de Telegram y la sincronización con Cloudflare.
+   - Corregidos los inserts de datos al formato requerido por InsForge (`insert([{...}])`).
 
-4. **Bot de Telegram inteligente**:
-   - Comprende lenguaje natural: "¿cómo está ecuaplac?", "hola", "visitas", etc.
-   - Realiza ping en vivo a las webs y responde con estado HTTP, latencia y SSL.
-   - Fallback conversacional con sugerencias de uso.
+4. **Sincronización Automática con Cloudflare:**
+   - Actualizado el token de Cloudflare con el token activo maestro.
+   - Sincronizados con éxito los 12 proyectos reales de Cloudflare Pages directamente en la base de datos de InsForge.
 
-5. **Informe Matutino Diario por Telegram (8:00 AM)**:
-   - Nuevo endpoint `/api/cron/daily-report` que hace ping a TODAS las webs de Cloudflare Pages.
-   - Configurado en `vercel.json` con cron `0 6 * * *` (06:00 UTC = 08:00 España).
-   - Envía informe completo por Telegram: webs operativas (🟢) o caídas (🔴) con latencia de cada una.
+5. **Optimización de Proxy y Compilación:**
+   - Configurado `src/proxy.ts` optimizado para Turbopack en Next.js 16 (compila en 1.3s con 0 errores).
 
-### 📁 Archivos modificados/creados:
-- `src/app/api/cloudflare/project-health/route.ts`
-- `src/app/api/cron/daily-report/route.ts` *(NUEVO)*
+6. **Merge a `main`:**
+   - Fusión completada de la rama `dev` hacia la rama `main` con autorización del usuario.
+
+### 📁 Archivos modificados:
+- `.env.local`
+- `package.json` y `package-lock.json`
+- `migrations/20260918161646_init-schema.sql` (NUEVO)
+- `src/lib/insforge/client.ts` (NUEVO)
+- `src/lib/insforge/server.ts` (NUEVO)
+- `src/lib/insforge/types.ts` (NUEVO)
+- `src/lib/supabase/client.ts`
+- `src/lib/supabase/server.ts`
+- `src/lib/activity.ts`
+- `src/lib/cloudflare-sync.ts`
+- `src/app/api/clients/route.ts` y `[id]/route.ts`
+- `src/app/api/projects/route.ts` y `[id]/route.ts`
+- `src/app/api/documents/route.ts` y `[id]/pdf/route.ts`
+- `src/app/api/dashboard/route.ts`
+- `src/app/api/activity/route.ts`
+- `src/app/api/health/route.ts`
 - `src/app/api/telegram/webhook/route.ts`
-- `src/components/dashboard/project-detail-modal.tsx`
-- `src/components/layout/app-layout.tsx`
-- `src/lib/pdf/invoice-template.tsx`
-- `src/lib/pdf/delivery-template.tsx`
-- `vercel.json`
+- `src/proxy.ts`
+- `docs/SESSION_LATEST_ES.md`
+- `docs/ROADMAP.md`
 
-### 📌 Estado:
-- **Rama activa**: `dev` (todo local, sin push a `main`).
-- **Pendiente de subir a GitHub/Vercel** cuando el usuario lo autorice.
+### 🔧 Qué problemas se han solucionado:
+- Error `PGRST205` de tabla no encontrada en Supabase solucionado migrando todo el esquema a InsForge.
+- Error `10000 Authentication error` de Cloudflare resuelto con el token activo.
+- Rutas de API caídas ahora responden con `200 OK` y salud global `healthy`.
+
+### 📌 Qué queda pendiente:
+- Definir `TELEGRAM_AUTHORIZED_USER_ID` en las variables de entorno de producción para el informe matutino.
+- Desplegar la nueva versión a Vercel vinculando las variables de entorno de InsForge.

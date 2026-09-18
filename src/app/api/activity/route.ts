@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const type = searchParams.get("type"); // e.g. "client", "project", "document"
   const source = searchParams.get("source"); // e.g. "telegram"
 
-  let query = supabaseAdmin
+  let query = insforgeAdmin
     .from("activity_logs")
     .select("*")
     .order("created_at", { ascending: false })

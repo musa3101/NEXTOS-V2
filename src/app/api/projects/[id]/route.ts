@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { logActivity } from "@/lib/activity";
-import { Database } from "@/lib/supabase/types";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await insforgeAdmin
     .from("projects")
     .select("*, clients(*), documents(*)")
     .eq("id", resolvedParams.id)
@@ -27,9 +26,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (body.budget) body.budget = parseFloat(body.budget);
 
     const updateData = { ...body, updated_at: new Date().toISOString() };
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await insforgeAdmin
       .from("projects")
-      // @ts-ignore
       .update(updateData)
       .eq("id", resolvedParams.id)
       .select()
@@ -55,7 +53,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await insforgeAdmin
     .from("projects")
     .delete()
     .eq("id", resolvedParams.id)

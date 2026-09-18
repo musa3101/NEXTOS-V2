@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { getCloudflareProjects } from "@/lib/cloudflare";
 
 // Fuzzy match cleanups
@@ -36,7 +36,7 @@ export async function syncCloudflareProjectsToClients() {
     console.log(`[CF Sync] Syncing ${cfProjects.length} Cloudflare projects to database clients...`);
 
     // Fetch all current clients to match locally
-    const { data: clientsData, error: clientsErr } = await supabaseAdmin
+    const { data: clientsData, error: clientsErr } = await insforgeAdmin
       .from("clients")
       .select("*");
 
@@ -60,24 +60,27 @@ export async function syncCloudflareProjectsToClients() {
         const formattedName = cfProj.name.charAt(0).toUpperCase() + cfProj.name.slice(1);
         console.log(`[CF Sync] Creating new client profile for Cloudflare site: ${formattedName}`);
         
-        const { data: newClient, error: createErr } = await (supabaseAdmin
+        const insertPayload = [{
+          name: formattedName,
+          company: formattedName,
+          status: "active",
+          notes: `Auto-generated from Cloudflare project: ${cfProj.name}`
+        }];
+
+        const { data: insertedData, error: createErr } = await (insforgeAdmin
           .from("clients") as any)
-          .insert({
-            name: formattedName,
-            company: formattedName,
-            status: "active",
-            notes: `Auto-generated from Cloudflare project: ${cfProj.name}`
-          } as any)
-          .select()
-          .single();
+          .insert(insertPayload)
+          .select();
+
+        const newClient = insertedData?.[0];
 
         if (createErr || !newClient) {
           console.error(`[CF Sync] Failed to create client for ${cfProj.name}:`, createErr?.message);
           continue;
         }
 
-        matchedClient = newClient as any;
-        clientId = (newClient as any).id;
+        matchedClient = newClient;
+        clientId = newClient.id;
         
         // Add to local array so subsequent matching loops can find it
         clients.push(matchedClient);
@@ -86,14 +89,13 @@ export async function syncCloudflareProjectsToClients() {
       }
 
       // Check if project exists in database
-      const { data: existingProjData } = await supabaseAdmin
+      const { data: existingProjData } = await insforgeAdmin
         .from("projects")
         .select("id, client_id")
         .eq("name", cfProj.name)
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
 
-      const existingProj = existingProjData as any;
+      const existingProj = Array.isArray(existingProjData) ? existingProjData[0] : existingProjData;
 
       const startD = cfProj.created_on 
         ? new Date(cfProj.created_on).toISOString().split("T")[0] 
@@ -102,21 +104,21 @@ export async function syncCloudflareProjectsToClients() {
       if (!existingProj) {
         // Create project
         console.log(`[CF Sync] Inserting project: ${cfProj.name} connected to client ID: ${clientId}`);
-        const { error: insertErr } = await (supabaseAdmin.from("projects") as any).insert({
+        const { error: insertErr } = await (insforgeAdmin.from("projects") as any).insert([{
           client_id: clientId,
           name: cfProj.name,
           description: `Cloudflare Pages Site - Subdomain: ${cfProj.subdomain || 'N/A'}`,
           status: "published",
           budget: 0,
           start_date: startD
-        } as any);
+        }]);
         if (insertErr) {
           console.error(`[CF Sync] Failed to insert project for ${cfProj.name}:`, insertErr.message);
         }
       } else if (existingProj.client_id !== clientId) {
         // Update project to point to the correct matched client instead of generic internal
         console.log(`[CF Sync] Updating project: ${cfProj.name} to link with client ID: ${clientId}`);
-        const { error: updateErr } = await (supabaseAdmin
+        const { error: updateErr } = await (insforgeAdmin
           .from("projects") as any)
           .update({ client_id: clientId })
           .eq("id", existingProj.id);

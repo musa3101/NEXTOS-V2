@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 
 export async function GET() {
   try {
     const [clientsRes, projectsRes, docsRes] = await Promise.all([
-      supabaseAdmin.from("clients").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("projects").select("id", { count: "exact", head: true }).eq("status", "development"),
-      supabaseAdmin.from("documents").select("id", { count: "exact", head: true }),
+      insforgeAdmin.from("clients").select("id", { count: "exact", head: true }),
+      insforgeAdmin.from("projects").select("id", { count: "exact", head: true }).eq("status", "development"),
+      insforgeAdmin.from("documents").select("id", { count: "exact", head: true }),
     ]);
 
     return NextResponse.json({

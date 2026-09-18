@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { logActivity } from "@/lib/activity";
 
 export async function GET(request: Request) {
@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const projectId = searchParams.get("projectId");
   const type = searchParams.get("type");
 
-  let query = supabaseAdmin
+  let query = insforgeAdmin
     .from("documents")
     .select("*, clients(name), projects(name)")
     .order("created_at", { ascending: false });
@@ -50,24 +50,25 @@ export async function POST(request: Request) {
       total_amount: total_amount ? parseFloat(total_amount) : null,
     };
 
-    const { data, error } = await supabaseAdmin
-      .from("documents")
-      .insert(payload as any)
-      .select()
-      .single();
+    const { data, error } = await (insforgeAdmin
+      .from("documents") as any)
+      .insert([payload])
+      .select();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const record = Array.isArray(data) ? data[0] : data;
+
     await logActivity({
       action: "generated",
       entityType: "document",
-      entityId: (data as any)?.id,
-      details: { number: (data as any)?.number, type },
+      entityId: record?.id,
+      details: { number: record?.number, type },
     });
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(record, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -9,6 +9,8 @@ export function proxy(request: NextRequest) {
   const isApiAuth = pathname.startsWith('/api/auth');
   const isApiTelegram = pathname.startsWith('/api/telegram');
   const isApiHealth = pathname.startsWith('/api/health');
+  const isApiCron = pathname.startsWith('/api/cron');
+  const isApiCloudflare = pathname.startsWith('/api/cloudflare');
 
   // Skip static assets, background images, and brand logos
   if (
@@ -22,9 +24,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isApiCloudflare = pathname.startsWith('/api/cloudflare');
-
-  if (isApiAuth || isApiTelegram || isApiHealth || isApiCloudflare) {
+  if (isApiAuth || isApiTelegram || isApiHealth || isApiCron || isApiCloudflare) {
     return NextResponse.next();
   }
 
@@ -40,5 +40,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api/telegram|api/auth|api/health|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api/telegram|api/auth|api/health|api/cron|_next/static|_next/image|favicon.ico).*)'],
 };

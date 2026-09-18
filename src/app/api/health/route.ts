@@ -1,29 +1,29 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { insforgeAdmin } from "@/lib/insforge/server";
 import { validateCloudflareConnection } from "@/lib/cloudflare";
 
 export async function GET(request: Request) {
   const start = Date.now();
-  let supabaseStatus = "down";
-  let supabaseLatency = -1;
+  let dbStatus = "down";
+  let dbLatency = -1;
 
-  // Helper for 2s max timeout per check
-  const withTimeout = <T>(promise: Promise<T>, timeoutMs = 2000): Promise<T> => {
+  // Helper for 3s max timeout per check
+  const withTimeout = <T>(promise: Promise<T>, timeoutMs = 3000): Promise<T> => {
     return Promise.race([
       promise,
       new Promise<T>((_, reject) => setTimeout(() => reject(new Error("Timeout")), timeoutMs)),
     ]);
   };
 
-  // Run Supabase and Cloudflare checks in parallel with timeout
-  const [sbResult, cfResult] = await Promise.allSettled([
-    withTimeout((async () => await supabaseAdmin.from("clients").select("id").limit(1))()),
+  // Run InsForge and Cloudflare checks in parallel with timeout
+  const [dbResult, cfResult] = await Promise.allSettled([
+    withTimeout((async () => await insforgeAdmin.from("clients").select("id").limit(1))()),
     withTimeout(validateCloudflareConnection()),
   ]);
 
-  if (sbResult.status === "fulfilled" && (!sbResult.value?.error || sbResult.value?.error?.code === "PGRST205")) {
-    supabaseStatus = "up";
-    supabaseLatency = Date.now() - start;
+  if (dbResult.status === "fulfilled" && !dbResult.value?.error) {
+    dbStatus = "up";
+    dbLatency = Date.now() - start;
   }
 
   const telegramStatus = process.env.TELEGRAM_BOT_TOKEN ? "up" : "down";
@@ -44,11 +44,15 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json({
-    status: supabaseStatus === "up" ? "healthy" : "degraded",
+    status: dbStatus === "up" && cloudflareStatus === "up" ? "healthy" : "degraded",
     services: {
+      insforge: {
+        status: dbStatus,
+        latency: dbLatency,
+      },
       supabase: {
-        status: supabaseStatus,
-        latency: supabaseLatency,
+        status: dbStatus,
+        latency: dbLatency,
       },
       telegram: {
         status: telegramStatus,
@@ -113,4 +117,3 @@ async function checkAndRestoreWebhook(vercelUrl: string, token: string) {
     console.error("[Telegram Webhook Self-Healing] Error:", err);
   }
 }
-

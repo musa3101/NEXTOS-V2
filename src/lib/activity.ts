@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "./supabase/server";
+import { insforgeAdmin } from "./insforge/server";
 
 export async function logActivity({
   action,
@@ -21,7 +21,7 @@ export async function logActivity({
       details,
       source,
     };
-    const { error } = await supabaseAdmin.from("activity_logs").insert(payload as any);
+    const { error } = await insforgeAdmin.from("activity_logs").insert([payload]);
     
     if (error) {
       console.error("Failed to log activity:", error);
