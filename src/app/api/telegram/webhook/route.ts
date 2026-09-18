@@ -109,7 +109,15 @@ export async function POST(req: Request) {
 async function processCommand(command: string, args: string[], chatId: number, apiBaseUrl: string, rawText?: string) {
   switch (command) {
     case "/start":
-      await sendMessage(chatId, "👋 <b>Bienvenido a Next LaB</b>\nSistema operativo interno de MyNext.\nUsa /help para ver los comandos.");
+      await sendMessage(
+        chatId, 
+        `👋 <b>Bienvenido a Next LaB</b>\nSistema operativo interno de MyNext.\n\n🆔 <b>Tu Telegram User ID:</b> <code>${chatId}</code>\n\nUsa /help para ver los comandos.`
+      );
+      break;
+
+    case "/id":
+    case "/myid":
+      await sendMessage(chatId, `🆔 <b>Tu Telegram User ID:</b> <code>${chatId}</code>`);
       break;
 
     case "/help":
