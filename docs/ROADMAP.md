@@ -11,8 +11,6 @@
 - [x] Datos reales de Cloudflare Pages API (despliegues totales, commit hash, rama activa) — sin datos falsos.
 - [x] Plantillas PDF rediseñadas: Facturas (estilo ECUAPLAC) y Entregas/Propuestas (estilo dark luxury bilingüe).
 - [x] Bot de Telegram con NLP en español (ping de webs, consulta de clientes, saludos conversacionales).
-- [x] Informe matutino diario a las 8:00 AM por Telegram con estado de todas las webs.
-- [x] Safe area en barra móvil inferior para iPhone (Home indicator).
 - [x] Migración completa de backend de Supabase a InsForge (PostgreSQL + SDK `@insforge/sdk`).
 - [x] Creación de esquema y tablas relacionales en InsForge (`clients`, `projects`, `documents`, `activity_logs`).
 - [x] Sincronización automática de proyectos Cloudflare con InsForge (12 proyectos y 12 clientes).
@@ -20,12 +18,16 @@
 - [x] Eliminación de métricas ficticias de Ubuntu y visualización de infraestructura real en Dashboard.
 - [x] Botón interactivo "Refrescar Cloudflare" con spinner y sincronización bidireccional.
 - [x] Selector de Clientes y Proyectos en Documentos con carga anticipada y estados claros.
-- [x] Configuración de variables de Cloudflare e InsForge en Vercel y despliegue a producción en `main`.
+- [x] Botón de despliegue manual a Cloudflare Pages ("Desplegar Ahora") integrado en el modal del proyecto.
+- [x] Corrección de funciones serverless de Telegram con `await processCommand(...)` para entrega garantizada.
+- [x] Configuración de `TELEGRAM_AUTHORIZED_USER_ID` en `.env.local` y Vercel (Producción, Preview y Dev).
+- [x] Prueba en vivo del informe matutino de salud a las 8:00 AM ejecutada y entregada con éxito.
 - [x] 100% de suites de tests unitarios pasando (24/24 pruebas).
+- [x] Despliegue en producción verificado en `https://nextos-v2.vercel.app`.
 
 ## 🔄 Tareas en Progreso
-- [ ] Validación continua del informe matutino de Telegram.
+- [ ] Optimización continua de respuestas y comandos del bot de Telegram.
 
 ## 🎯 Próximas Mejoras Prioritarias
-- [ ] Configurar `TELEGRAM_AUTHORIZED_USER_ID` en Vercel para habilitar el envío del informe diario a las 8:00 AM.
 - [ ] Sección de filtros avanzados y exportación CSV de clientes y facturas.
+- [ ] Gráficas de evolución histórica de visitas y analíticas.
