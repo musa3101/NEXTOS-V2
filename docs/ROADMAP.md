@@ -1,36 +1,63 @@
-# ROADMAP — NEXTOS V2
+# ROADMAP — NextOS v2
 
 ## ✅ Completado
 
-- [x] Layout base (sidebar, header, bottom nav móvil, drawer)
-- [x] Autenticación con InsForge (login, sesión, logout)
-- [x] Dashboard con stats, proyectos Cloudflare, gráfica, actividad e infraestructura
-- [x] Sección Clientes — lista, filtro, búsqueda, formulario de creación, sync Cloudflare
-- [x] Sección Proyectos — lista y gestión de proyectos
-- [x] Sección Documentos — listado, generación de facturas y actas de entrega en PDF
-- [x] Sección Actividad — registro de operaciones
-- [x] Sección Monitorización — estado de servicios e infraestructura
-- [x] Bot de Telegram AI conversacional con memoria persistente y tool calling
-  - Herramientas: `get_system_health`, `list_clients`, `list_projects`, `trigger_deploy`, `create_invoice`, `create_proposal`, `create_delivery`, `remember_user_fact`
-- [x] Bot de Telegram — soporte multimodal (fotos 📸 y notas de voz 🎙️) con Gemini 2.5 Flash
-- [x] Responsividad móvil completa en Documentos y Clientes (vistas card en iPhone)
-- [x] Merge dev→main + deploy automático en Vercel
+### v2.0 — Base
+- [x] Estructura Next.js 14 App Router
+- [x] Autenticación con cookie segura
+- [x] Layout responsivo (sidebar + mobile nav)
+- [x] Dashboard con KPIs y stats
+
+### v2.1 — Clientes & Proyectos
+- [x] CRUD completo de clientes
+- [x] CRUD completo de proyectos
+- [x] Integración Cloudflare Pages API
+- [x] Sincronización automática de dominios
+
+### v2.2 — Documentos & PDF
+- [x] Generación de facturas PDF
+- [x] Generación de propuestas PDF
+- [x] Generación de albaranes PDF
+- [x] Templates con logos MN
+
+### v2.3 — Bot Telegram + Responsive Móvil
+- [x] Bot de Telegram multimodal (texto, fotos, voz)
+- [x] Navegación móvil nativa (bottom nav iOS)
+- [x] Safe area insets para iPhone
+
+### v2.4 — Identidad + Sesión + Notificaciones (HOY)
+- [x] Icono de app iPhone (logo2.jpg como favicon + apple-icon)
+- [x] Manifest PWA completo
+- [x] Sesión por inactividad (3 días, rolling cookie)
+- [x] Modal de bienvenida dinámico (Buenos días/tardes/noches señor Musa)
+- [x] Resumen de actividad por ausencia al entrar
+- [x] Web Push Notifications → iPhone nativo
+- [x] Service Worker para notificaciones en background
+- [x] Alerta automática push si InsForge o Cloudflare caen
+- [x] Botón 🔔 en header para test de notificaciones
+- [x] Base de datos de clientes desde Cloudflare (CSV + JSON)
 
 ---
 
-## 🔄 En progreso / Próximos pasos prioritarios
+## 🔄 En progreso
 
-- [ ] **Previsualización de documentos** — Modal/drawer con visor inline del PDF al pulsar icono "ojo" en la tabla de documentos
-- [ ] **Probar bot multimodal en Telegram** — Enviar fotos y audios reales y validar respuestas
-- [ ] **Responsividad móvil** en páginas de Proyectos, Actividad y Monitorización (si fuera necesario)
-- [ ] **Mejoras en formulario de facturas** — Guardar borradores, numeración automática personalizable
+- [ ] Sección de Clientes en NextOS integrada con `clientes_cloudflare.json`
+- [ ] Bot Telegram responde con datos de clientes al pedir facturas
 
 ---
 
-## 💡 Ideas para más adelante
+## 📋 Próximas mejoras prioritarias
 
-- [ ] Notificaciones push / alertas automáticas cuando una web cae
-- [ ] Panel de analítica de ingresos con gráficas reales (facturas por mes)
-- [ ] Modo edición de clientes y proyectos (formulario inline)
-- [ ] Integración de pagos con Stripe (NextTrade / NextLead SaaS)
-- [ ] Exportar listado de documentos a CSV/Excel
+### Alta prioridad
+1. **Integración clientes → bot Telegram** — Al pedir factura por Telegram, el bot busca los datos del cliente en la DB y rellena automáticamente
+2. **Sección Clientes en NextOS** — Tabla, filtros, y vista detalle de cada cliente con todos sus proyectos
+3. **Notificaciones en app** — Centro de notificaciones dentro de NextOS (historial de alertas)
+
+### Media prioridad
+4. **Informes automáticos mensuales** — PDF de resumen mensual enviado por Telegram/email
+5. **Calendario de mantenimientos** — Vista tipo agenda con recordatorios push
+6. **Multi-idioma** — Español / Inglés para documentos de clientes internacionales
+
+### Baja prioridad
+7. **Dark/Light mode toggle** — Modo claro opcional
+8. **Export CSV desde la app** — Exportar clientes/proyectos desde el dashboard

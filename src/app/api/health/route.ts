@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { insforgeAdmin } from "@/lib/insforge/server";
 import { validateCloudflareConnection } from "@/lib/cloudflare";
+import { broadcastPush } from "@/lib/push";
 
 export async function GET(request: Request) {
   const start = Date.now();
@@ -43,27 +44,31 @@ export async function GET(request: Request) {
     await checkAndRestoreWebhook(vercelUrl, process.env.TELEGRAM_BOT_TOKEN);
   }
 
+  const overallStatus =
+    dbStatus === "up" && cloudflareStatus === "up" ? "healthy" : "degraded";
+
+  // 🚨 Push alert when any service is down
+  if (overallStatus === "degraded" && isVercel) {
+    const downServices = [];
+    if (dbStatus === "down") downServices.push("Base de datos (InsForge)");
+    if (cloudflareStatus === "down") downServices.push("Cloudflare");
+
+    broadcastPush({
+      title: "⚠️ NextOS — Alerta de Sistema",
+      body: `Servicio(s) caído(s): ${downServices.join(", ")}. Revisa el monitor.`,
+      url: "/monitoring",
+      urgency: "high",
+    }).catch(() => {}); // fire-and-forget, don't block response
+  }
+
   return NextResponse.json({
-    status: dbStatus === "up" && cloudflareStatus === "up" ? "healthy" : "degraded",
+    status: overallStatus,
     services: {
-      insforge: {
-        status: dbStatus,
-        latency: dbLatency,
-      },
-      supabase: {
-        status: dbStatus,
-        latency: dbLatency,
-      },
-      telegram: {
-        status: telegramStatus,
-      },
-      cloudflare: {
-        status: cloudflareStatus,
-      },
-      api: {
-        status: "up",
-        latency: Date.now() - start,
-      }
+      insforge: { status: dbStatus, latency: dbLatency },
+      supabase: { status: dbStatus, latency: dbLatency },
+      telegram: { status: telegramStatus },
+      cloudflare: { status: cloudflareStatus },
+      api: { status: "up", latency: Date.now() - start },
     },
     timestamp: new Date().toISOString(),
   });

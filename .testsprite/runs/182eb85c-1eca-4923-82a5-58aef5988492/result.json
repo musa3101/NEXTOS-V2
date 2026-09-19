@@ -1,0 +1,24 @@
+{
+  "testId": "4e94d371-2d63-4956-95b8-31100fe69aa0",
+  "status": "failed",
+  "startedAt": null,
+  "finishedAt": "2026-09-19T12:30:56.049Z",
+  "videoUrl": "https://testsprite-videos.s3.us-east-1.amazonaws.com/20260919-123054-a2b57198.webm?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZQ3DRZAIJXHQCYQ5%2F20260919%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260919T123100Z&X-Amz-Expires=604800&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEJD%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIGvj6yOSoh8avn4FEUxG0ldZGvO40nWqi9UQHUc%2BOqzJAiEAgx7WMVBKNaKHRDDUqsL8qOuibPe1plsyTb77S%2Fkupp8q%2BwMIWBAAGgw2NTQ2NTQ0MjUxMDQiDCW50sU4VwuLhhqTrirYA11o6PxkBXuARmHprlhSvxDntqCyDN2G9DQNUmM8qBi1o8lN6mCxzzHA%2BuvH11oFjK1b7r3dH1k8SJNj%2FiBDTwtFeyV0MxXJLhIDn8D%2FoS4uszIFNWNZbqzkJldBgvhJSqsYcxqKlZKWQtcnmHZGxQcNnryK3XgY4wgDm%2BOv0tU646MI8MR0lvookqdYa%2Fh2F6YLo9pFwk3rWeCYmJNXILuWudfjbcnPzznlObvKYQsqer8xyZnFVGaQMQnhz57YWJNjtC4DDdmgg88smhokgYlWhraVzO%2FazZJRTD3WoducF4UZaUZRivxHrLgrgT7PEFTZEX2BUYsZbgpK4%2FlkyIxSsPNXY0hAXRNjqovt%2F%2B%2F%2Fd6PqQjddRoyL9PtN1fCusUH41LKdbDbHEipR57LXU7T6D8EE91oGEFgMeUTyEZLIyQANUqxD9lQDelsGR1ye%2BUVr6P3rkTjk57LgbOSv6CHX2COwImbBTLNu8BggcONJYanMFywQpktpzYOAt3w97l4JQHjyZ0VEiWDzeMknBHLYrdPALdQibX4wYQd06TKpnLoxqQ3muEa9uSn0S9X6J%2BJoyaDqC%2BBlalbJqETASyzlIqrsYAzKmUe7G4dGDeIMv0TCjRMG3ewwi%2By41QY6pQH9lcyARExiHjCCH36am2bfdYQk9MNJaAj8FUsvvkLLrE5kQ2Hgsuro%2FLv4Sy085OiEzE99AXiVUljc%2BlSMUNlcxm0oMGQ6IfUBWUYibFTf6H9tgjtLBFCHdEvOx8kE5Bs53xelgFPdqKEoORP4l61AYJohJUUzGWu47OGV5t4%2FOndSVaLdHmxazs6wwr5SWUUbHIb2MhoJO4UbFd05vDoIOqbd05g%3D&X-Amz-Signature=9f00e6827adb57a6b094a92a6f0d6972628d05798d808ecb407325e1713ba496&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+  "failureAnalysisUrl": null,
+  "snapshotId": "snap_ab7ecbffaa7b79e3",
+  "runIdIfAvailable": "182eb85c-1eca-4923-82a5-58aef5988492",
+  "codeVersion": null,
+  "targetUrl": "https://mynextbymusa.com",
+  "targetUrlSource": null,
+  "environment": {
+    "id": "c0fb2a9d-f873-4565-af75-ed25b365bf86",
+    "name": "default"
+  },
+  "failedStepIndex": 1,
+  "failureKind": "timeout",
+  "verdict": "failed",
+  "executionStatus": "completed",
+  "summary": "Failed (timeout): The test could not find a visible, enabled button matching the accessible role/name, likely because the CTA is not being rendered in time or its accessible label differs from the expected value. Common hosting-side causes include slow page hydration/JavaScript execution, late-loading content, an overlay or cookie consent blocking the button, or a markup/accessibility change that alters the button’s name (for example, icon text being appended/removed). Underlying error: Timeout… Target: environment default (https://mynextbymusa.com).",
+  "apiOutput": null,
+  "trace": null
+}

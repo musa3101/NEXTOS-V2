@@ -6,7 +6,9 @@ import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { AnimatedBackground } from "./animated-background";
 import Link from "next/link";
-import { X, LayoutDashboard, FolderKanban, Users, FileText, ActivitySquare } from "lucide-react";
+import { X, LayoutDashboard, FolderKanban, Users, CalendarClock, FileText, ShieldCheck } from "lucide-react";
+import { WelcomeModal } from "@/components/notifications/welcome-modal";
+import { PushInit } from "@/components/notifications/push-init";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,10 +16,11 @@ interface AppLayoutProps {
 
 const mobileNavItems = [
   { name: "Inicio", href: "/", icon: LayoutDashboard },
-  { name: "Proyectos", href: "/projects", icon: FolderKanban },
   { name: "Clientes", href: "/clients", icon: Users },
+  { name: "Proyectos", href: "/projects", icon: FolderKanban },
+  { name: "Mant.", href: "/maintenance", icon: CalendarClock },
   { name: "Docs", href: "/documents", icon: FileText },
-  { name: "Monitor", href: "/monitoring", icon: ActivitySquare },
+  { name: "Monitor", href: "/monitoring", icon: ShieldCheck },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -36,7 +39,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden bg-[#0c0c0e]">
+    <div className="relative flex h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-[#0c0c0e]">
       {/* Dynamic backdrop */}
       <AnimatedBackground />
 
@@ -65,7 +68,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Main app panel */}
-      <div className="relative z-10 flex h-full w-full overflow-hidden">
+      <div className="relative flex h-full w-full overflow-hidden">
         {/* Desktop Sidebar (hidden on mobile) */}
         <div className="hidden md:flex md:w-64 md:shrink-0 h-full">
           <Sidebar />
@@ -79,10 +82,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
           </main>
         </div>
+
+        {/* 🔔 Notifications & Greeting */}
+        <WelcomeModal />
+        <PushInit />
       </div>
 
       {/* 📱 iOS Native Mobile Bottom Navigation Bar (Elevated for iPhone Home Indicator) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#121217]/95 backdrop-blur-2xl border-t border-[#D4A853]/30 px-2 pt-2.5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.9)] flex justify-around items-center">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#121217]/95 backdrop-blur-2xl border-t border-[#D4A853]/30 px-2 pt-2.5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(0,0,0,0.9)] flex justify-around items-center">
         {mobileNavItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           const Icon = item.icon;

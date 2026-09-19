@@ -142,7 +142,7 @@ export default {
 async function processCommand(command: string, args: string[], chatId: number) {
   switch (command) {
     case "/start":
-      await sendMessage(chatId, "👋 <b>Bienvenido a Next LaB</b>\nSistema operativo interno de MyNext.\nUsa /help para ver los comandos.")
+      await sendMessage(chatId, "👋 <b>Bienvenido a NEXTOS</b>\nSistema operativo interno de MyNext.\nUsa /help para ver los comandos.")
       break
 
     case "/help":

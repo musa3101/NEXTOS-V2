@@ -1,254 +1,315 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Link, StyleSheet, Image } from '@react-pdf/renderer';
+import { getLogoDarkSource } from './assets';
 
 export interface DeliveryData {
-  number: string;
-  date: string;
+  number?: string;
+  date?: string;
   client: {
     name: string;
-    company: string;
+    company?: string;
   };
   project: {
     name: string;
     demoUrl?: string;
+    adminUrl?: string;
   };
   summary?: string;
   stack?: string[];
   deliverables?: string[];
-  credentials?: {
+  credentials?: Array<{
     service: string;
     url?: string;
     username: string;
     password?: string;
-  }[];
+  }>;
+  closingMessage?: string;
   language?: 'es' | 'en';
 }
 
 const deliveryStyles = StyleSheet.create({
   page: {
-    padding: 40,
-    backgroundColor: '#0C0C0E',
+    paddingTop: 24,
+    paddingBottom: 18,
+    paddingHorizontal: 38,
+    backgroundColor: '#09090B',
     fontFamily: 'Helvetica',
     color: '#FFFFFF',
+    position: 'relative',
+    justifyContent: 'space-between',
   },
-  // Top Header Banner
+  // Inset Gold Frame
+  outerBorder: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    right: 12,
+    bottom: 12,
+    borderWidth: 1,
+    borderColor: '#382F1D',
+    pointerEvents: 'none',
+  },
+
+  // Header Banner
   headerContainer: {
     alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 10,
-    position: 'relative',
+    marginBottom: 8,
   },
-  sideLineLeft: {
-    position: 'absolute',
-    left: 0,
-    top: 20,
-    width: 60,
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#D4A853',
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 3,
+    width: '100%',
   },
-  sideLineRight: {
-    position: 'absolute',
-    right: 0,
-    top: 20,
+  sideLine: {
     width: 60,
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#D4A853',
+    height: 1,
+    backgroundColor: '#C5A059',
   },
   mainLogo: {
-    fontSize: 28,
+    fontSize: 22,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: 4,
+    marginHorizontal: 14,
     color: '#FFFFFF',
   },
+  logoAccent: {
+    color: '#C5A059',
+  },
   subtitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    letterSpacing: 3,
-    color: '#D4A853',
-    marginTop: 4,
+    color: '#C5A059',
+    letterSpacing: 4,
     textTransform: 'uppercase',
   },
 
-  // Greeting & Letter Body
+  // Main Content Section
+  contentSection: {
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    marginVertical: 'auto',
+  },
   greetingText: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
     color: '#FFFFFF',
-    marginBottom: 16,
-    marginTop: 10,
-  },
-  bodyParagraph: {
-    fontSize: 11,
-    lineHeight: 1.6,
     textAlign: 'center',
-    color: '#DDDDDD',
-    marginBottom: 24,
-    paddingHorizontal: 20,
+    marginBottom: 8,
   },
-  businessName: {
+  bodyText: {
+    fontSize: 9.5,
+    lineHeight: 1.45,
+    textAlign: 'center',
+    color: '#CCCCCC',
+    marginBottom: 8,
+    maxWidth: 480,
+  },
+  projectNameHighlight: {
     fontFamily: 'Helvetica-Bold',
-    color: '#D4A853',
+    color: '#C5A059',
   },
 
-  // Gold CTA Button
+  // CTA Demo Button
   ctaContainer: {
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 6,
   },
   ctaLabel: {
     fontSize: 9,
     color: '#CCCCCC',
-    marginBottom: 8,
+    marginBottom: 5,
+    textAlign: 'center',
   },
-  ctaButton: {
-    backgroundColor: '#D4A853',
-    paddingVertical: 10,
-    paddingHorizontal: 28,
-    borderRadius: 8,
+  buttonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  ctaButtonText: {
-    fontSize: 11,
+  goldButton: {
+    backgroundColor: '#C5A059',
+    borderRadius: 3,
+    paddingVertical: 8,
+    paddingHorizontal: 30,
+    textDecoration: 'none',
+    alignSelf: 'center',
+  },
+  goldButtonText: {
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
     color: '#000000',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    textAlign: 'center',
+  },
+  adminButton: {
+    backgroundColor: '#1E1E24',
+    borderWidth: 1,
+    borderColor: '#C5A059',
+    borderRadius: 3,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    textDecoration: 'none',
+  },
+  adminButtonText: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#C5A059',
+    letterSpacing: 1.5,
+    textAlign: 'center',
   },
 
-  // Content Box
-  detailsSection: {
-    backgroundColor: '#141419',
+  // Deliverables / Technical Scope List
+  deliverablesBox: {
+    backgroundColor: '#111115',
     borderWidth: 1,
-    borderColor: '#333333',
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 16,
+    borderColor: '#222228',
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginVertical: 6,
+    width: '100%',
+    maxWidth: 480,
   },
-  sectionTitle: {
-    fontSize: 10,
+  deliverablesTitle: {
+    fontSize: 8.5,
     fontFamily: 'Helvetica-Bold',
-    color: '#D4A853',
+    color: '#C5A059',
+    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 8,
   },
-  detailText: {
-    fontSize: 10,
-    lineHeight: 1.5,
-    color: '#CCCCCC',
+  deliverableItem: {
+    fontSize: 8,
+    lineHeight: 1.35,
+    color: '#DDDDDD',
+    marginBottom: 2.5,
+  },
+  bulletGold: {
+    color: '#C5A059',
+    fontFamily: 'Helvetica-Bold',
   },
 
   // Closing Note
   closingText: {
-    fontSize: 10,
-    lineHeight: 1.5,
+    fontSize: 8.5,
+    lineHeight: 1.4,
     textAlign: 'center',
     color: '#CCCCCC',
-    marginVertical: 16,
-    paddingHorizontal: 20,
+    marginTop: 6,
+    maxWidth: 480,
   },
-  thankYouTitle: {
-    fontSize: 12,
+  thankYouText: {
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
     textAlign: 'center',
-    color: '#D4A853',
-    marginVertical: 14,
+    color: '#C5A059',
+    letterSpacing: 0.5,
+    marginTop: 6,
   },
 
-  // Footer Logo Mark
+  // Footer Monogram & Made By
   footerContainer: {
     alignItems: 'center',
-    marginTop: 'auto',
-    paddingTop: 10,
+    marginTop: 4,
   },
-  brandMark: {
-    fontSize: 32,
-    fontFamily: 'Helvetica-Bold',
-    color: '#22222a',
-    letterSpacing: 2,
-    marginBottom: 10,
+  monogramWatermark: {
+    width: 48,
+    height: 48,
+    marginBottom: 4,
   },
-  bottomLine: {
-    width: 280,
-    borderBottomWidth: 1,
-    borderBottomColor: '#D4A853',
-    marginBottom: 8,
+  goldLine: {
+    width: 220,
+    height: 1,
+    backgroundColor: '#C5A059',
+    marginBottom: 4,
   },
   madeByText: {
-    fontSize: 8,
+    fontSize: 7,
     fontFamily: 'Helvetica-Bold',
-    letterSpacing: 2,
+    letterSpacing: 3,
     color: '#888888',
     textTransform: 'uppercase',
   },
 });
 
 export const DeliveryTemplate = ({ data }: { data: DeliveryData }) => {
-  const isEn = data.language === 'en';
-  const clientName = data.client.company || data.client.name || 'Cliente';
-  const demoUrl = data.project?.demoUrl || (data.credentials && data.credentials[0]?.url) || 'https://www.mynextbymusa.com';
+  const clientName = data.client?.company || data.client?.name || 'Cliente';
+  const projectName = data.project?.name || 'Proyecto Web';
+  const demoUrl = data.project?.demoUrl || 'https://www.mynextbymusa.com';
+
+  const intro =
+    data.summary ||
+    `Aquí tienes la web de ${projectName} terminada. He preparado el acceso directo para que puedas entrar, navegar y ver cómo ha quedado todo el diseño final en tiempo real.`;
+
+  const closing =
+    data.closingMessage ||
+    `${projectName} ya está oficialmente en línea. Échale un vistazo con calma, pruébala bien y mírale todos los detalles. Si encuentras cualquier cosa que quieras cambiar, ajustar o añadir, avísame y lo modifico. ¡Espero que te guste mucho el resultado!`;
 
   return (
     <Document>
       <Page size="A4" style={deliveryStyles.page}>
-        {/* Top Header Banner */}
+        <View style={deliveryStyles.outerBorder} />
+
+        {/* Top Header */}
         <View style={deliveryStyles.headerContainer}>
-          <View style={deliveryStyles.sideLineLeft} />
-          <Text style={deliveryStyles.mainLogo}>MYNEXT</Text>
-          <Text style={deliveryStyles.subtitle}>PROJECT DELIVERY</Text>
-          <View style={deliveryStyles.sideLineRight} />
-        </View>
-
-        {/* Greeting */}
-        <Text style={deliveryStyles.greetingText}>
-          {isEn ? "Hello, it's a pleasure to greet you!" : "Hola, es un placer saludarte!"}
-        </Text>
-
-        {/* Intro Copy */}
-        <Text style={deliveryStyles.bodyParagraph}>
-          {isEn
-            ? `I'm passionate about seeing local businesses grow and, after exploring a bit about your wonderful company and its values, I felt inspired. With no obligation, I've prepared this preview of how your online presence could look, so you can see the potential of MYNEXT for `
-            : `Me apasiona ver crecer a los negocios locales y, tras explorar un poco sobre tu maravillosa empresa y sus valores, me sentí inspirado. Sin ningún compromiso, he preparado esta previsualización de cómo podría lucir tu presencia online, para que veas el potencial de MYNEXT para `}
-          <Text style={deliveryStyles.businessName}>{clientName}</Text>.
-        </Text>
-
-        {/* Gold CTA Button */}
-        <View style={deliveryStyles.ctaContainer}>
-          <Text style={deliveryStyles.ctaLabel}>
-            {isEn ? "Access the demo here 👇" : "Accede a la demo aquí 👇"}
-          </Text>
-          <Link src={demoUrl} style={deliveryStyles.ctaButton}>
-            <Text style={deliveryStyles.ctaButtonText}>
-              {isEn ? "CLICK HERE ✨" : "ACCEDER A LA DEMO ✨"}
+          <View style={deliveryStyles.logoRow}>
+            <View style={deliveryStyles.sideLine} />
+            <Text style={deliveryStyles.mainLogo}>
+              MY<Text style={deliveryStyles.logoAccent}>NEXT</Text>
             </Text>
-          </Link>
-        </View>
-
-        {/* Summary or Technical Details if provided */}
-        {data.summary && (
-          <View style={deliveryStyles.detailsSection}>
-            <Text style={deliveryStyles.sectionTitle}>
-              {isEn ? "Project Summary & Scope" : "Resumen y Alcance del Proyecto"}
-            </Text>
-            <Text style={deliveryStyles.detailText}>{data.summary}</Text>
+            <View style={deliveryStyles.sideLine} />
           </View>
-        )}
+          <Text style={deliveryStyles.subtitle}>PROJECT DELIVERY</Text>
+        </View>
 
-        {/* Closing Note */}
-        <Text style={deliveryStyles.closingText}>
-          {isEn
-            ? "Please review the content and technical details. I look forward to your feedback to proceed with the final adjustments and definitive delivery once completed the process."
-            : "Por favor, revisa el contenido y los detalles técnicos. Quedo a la espera de tus comentarios para proceder con los ajustes finales y la entrega definitiva una vez completado el proceso administrativo."}
-        </Text>
+        {/* Main Content */}
+        <View style={deliveryStyles.contentSection}>
+          <Text style={deliveryStyles.greetingText}>
+            Hola {clientName}, es un placer saludarte!
+          </Text>
 
-        <Text style={deliveryStyles.thankYouTitle}>
-          {isEn ? "Thank you for trusting MYNEXT." : "Gracias por confiar en MYNEXT."}
-        </Text>
+          <Text style={deliveryStyles.bodyText}>
+            {intro}
+          </Text>
 
-        {/* Footer Brand Mark */}
+          {/* Gold Clickable CTA Button */}
+          <View style={deliveryStyles.ctaContainer}>
+            <Text style={deliveryStyles.ctaLabel}>Accede a la web aquí:</Text>
+            <View style={deliveryStyles.buttonsRow}>
+              <Link src={demoUrl} style={deliveryStyles.goldButton}>
+                <Text style={deliveryStyles.goldButtonText}>TU WEB</Text>
+              </Link>
+              {data.project?.adminUrl && (
+                <Link src={data.project.adminUrl} style={deliveryStyles.adminButton}>
+                  <Text style={deliveryStyles.adminButtonText}>PANEL ADMIN</Text>
+                </Link>
+              )}
+            </View>
+          </View>
+
+          {/* Deliverables / Scope List */}
+          {data.deliverables && data.deliverables.length > 0 && (
+            <View style={deliveryStyles.deliverablesBox}>
+              <Text style={deliveryStyles.deliverablesTitle}>Detalle de entregables completados</Text>
+              {data.deliverables.map((item, i) => (
+                <Text key={i} style={deliveryStyles.deliverableItem}>
+                  <Text style={deliveryStyles.bulletGold}>• </Text>{item}
+                </Text>
+              ))}
+            </View>
+          )}
+
+          <Text style={deliveryStyles.closingText}>{closing}</Text>
+
+          <Text style={deliveryStyles.thankYouText}>Gracias por confiar en MYNEXT.</Text>
+        </View>
+
+        {/* Footer Monogram */}
         <View style={deliveryStyles.footerContainer}>
-          <Text style={deliveryStyles.brandMark}>MN</Text>
-          <View style={deliveryStyles.bottomLine} />
+          <Image src={getLogoDarkSource()} style={deliveryStyles.monogramWatermark} />
+          <View style={deliveryStyles.goldLine} />
           <Text style={deliveryStyles.madeByText}>MADE BY MYNEXT</Text>
         </View>
       </Page>

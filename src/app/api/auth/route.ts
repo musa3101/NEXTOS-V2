@@ -10,12 +10,17 @@ export async function POST(req: Request) {
 
     if (email === adminEmail && password === adminPassword) {
       const cookieStore = await cookies();
+      // Session: 3 days of inactivity → auto logout
+      // The middleware refreshes this cookie on every request, so the
+      // 3-day countdown resets with each visit. If the user is inactive
+      // for 3 days the cookie expires and they are redirected to /login.
+      const SESSION_MAX_AGE = 60 * 60 * 24 * 3; // 3 days in seconds
       cookieStore.set("nextos_session", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: SESSION_MAX_AGE,
       });
 
       return NextResponse.json({ success: true });

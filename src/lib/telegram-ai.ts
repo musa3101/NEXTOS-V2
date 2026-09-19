@@ -3,12 +3,22 @@ import { sendMessage, sendDocument } from "@/lib/telegram";
 import { getCloudflareProjects, getPrimaryProjectUrl, triggerCloudflareDeploy } from "@/lib/cloudflare";
 import { generateInvoicePdf, generateDeliveryPdf, generateProposalPdf } from "@/lib/pdf/generate";
 import { logActivity } from "@/lib/activity";
+import {
+  getLatestCommits,
+  getCommitDetails,
+  getRepositoryStatus,
+  listUserRepositories,
+  getWorkflowRuns,
+} from "@/lib/github";
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-// Primary model: gemini-2.5-flash (ultra fast, high reasoning, excellent tool calling)
-// Fallbacks: meta-llama/llama-3.3-70b-instruct (free/powerful), deepseek/deepseek-chat
-const PRIMARY_MODEL = process.env.OPENROUTER_CHAT_MODEL || "google/gemini-2.5-flash";
-const FALLBACK_MODEL = "meta-llama/llama-3.3-70b-instruct";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+// Primary direct free engine: Google AI Studio gemini-3.6-flash (100% gratis, multimodal y con function calling)
+const GOOGLE_MODEL = "gemini-3.6-flash";
+// Fallbacks en OpenRouter si Google estuviera saturado
+const OPENROUTER_PRIMARY_MODEL = process.env.OPENROUTER_CHAT_MODEL || "google/gemini-2.5-flash";
+const OPENROUTER_FALLBACK_MODEL = "meta-llama/llama-3.3-70b-instruct";
 
 // Tool schemas for OpenRouter function calling
 const AI_TOOLS = [
@@ -135,7 +145,7 @@ const AI_TOOLS = [
     type: "function",
     function: {
       name: "create_proposal",
-      description: "Genera un documento PDF oficial de Propuesta de Demo (diseño Luxury MyNext) con el enlace de la demo web, y lo envía por Telegram.",
+      description: "Genera un documento PDF oficial de Propuesta Interactiva (diseño Luxury MyNext) con el botón dorado interactivo [TU WEB], y lo envía por Telegram.",
       parameters: {
         type: "object",
         properties: {
@@ -145,7 +155,28 @@ const AI_TOOLS = [
           },
           demoUrl: {
             type: "string",
-            description: "URL de la demo o prototipo web (ej: 'https://demo.mynext.dev/restaurante').",
+            description: "URL de la web o prototipo interactivo (ej: 'https://shopisafer.com' o 'https://demo.mynextbymusa.com'). OBLIGATORIO para el botón [TU WEB].",
+          },
+          clientName: {
+            type: "string",
+            description: "Nombre de pila del cliente (ej: 'Camila', 'Goyo').",
+          },
+          adminUrl: {
+            type: "string",
+            description: "URL opcional al panel de administración o backend (para incluir botón adicional [PANEL ADMIN]).",
+          },
+          features: {
+            type: "array",
+            items: { type: "string" },
+            description: "Pilares o puntos destacados de la propuesta (ej: Experiencia de usuario, Panel de gestión).",
+          },
+          introMessage: {
+            type: "string",
+            description: "Mensaje introductorio personalizado (opcional).",
+          },
+          closingMessage: {
+            type: "string",
+            description: "Mensaje de cierre o llamada de seguimiento (opcional).",
           },
         },
         required: ["businessName", "demoUrl"],
@@ -156,7 +187,7 @@ const AI_TOOLS = [
     type: "function",
     function: {
       name: "create_delivery",
-      description: "Genera un Acta de Entrega oficial de proyecto web en PDF y la envía por Telegram.",
+      description: "Genera un Acta de Entrega oficial de proyecto web en PDF con el botón interactivo [TU WEB] y la envía por Telegram.",
       parameters: {
         type: "object",
         properties: {
@@ -168,13 +199,97 @@ const AI_TOOLS = [
             type: "string",
             description: "Nombre del proyecto o web entregada.",
           },
-          features: {
+          demoUrl: {
+            type: "string",
+            description: "URL pública de la web entregada (ej: 'https://ecuaplac.com' o 'https://blessdbarber.pages.dev'). OBLIGATORIA para que el cliente pueda pulsar [TU WEB] y acceder.",
+          },
+          adminUrl: {
+            type: "string",
+            description: "URL opcional al panel de control o backend del cliente (para incluir botón [PANEL ADMIN]).",
+          },
+          deliverables: {
             type: "array",
-            description: "Lista de funcionalidades o entregables incluidos.",
             items: { type: "string" },
+            description: "Lista de funcionalidades, mejoras o entregables realizados (SEO, diseño responsive, panel backend, etc.).",
+          },
+          summary: {
+            type: "string",
+            description: "Resumen introductorio del trabajo realizado (opcional).",
+          },
+          closingMessage: {
+            type: "string",
+            description: "Mensaje de cierre y soporte post-entrega (opcional).",
           },
         },
-        required: ["clientName", "projectName"],
+        required: ["clientName", "projectName", "demoUrl"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_github_activity",
+      description: "Consulta los últimos commits, fecha, autor y estado general de un repositorio en GitHub. Por defecto revisa el repositorio principal NEXTOS-V2.",
+      parameters: {
+        type: "object",
+        properties: {
+          repo: {
+            type: "string",
+            description: "Nombre del repositorio (ej: 'NEXTOS-V2'). Por defecto 'NEXTOS-V2'.",
+          },
+          limit: {
+            type: "number",
+            description: "Número de commits a consultar (por defecto 5).",
+          },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_github_commit_details",
+      description: "Consulta el detalle profundo de un commit específico en GitHub: archivos modificados, líneas añadidas/eliminadas y resumen de cambios.",
+      parameters: {
+        type: "object",
+        properties: {
+          sha: {
+            type: "string",
+            description: "El hash SHA o identificador del commit (ej: 'e696432').",
+          },
+          repo: {
+            type: "string",
+            description: "Nombre del repositorio (por defecto 'NEXTOS-V2').",
+          },
+        },
+        required: ["sha"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_github_ci_status",
+      description: "Comprueba el estado de las GitHub Actions, pruebas automáticas y workflows de CI/CD para detectar si hubo fallos de compilación o tests.",
+      parameters: {
+        type: "object",
+        properties: {
+          repo: {
+            type: "string",
+            description: "Nombre del repositorio (por defecto 'NEXTOS-V2').",
+          },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "list_github_repos",
+      description: "Lista los repositorios en la cuenta de GitHub de Musa (musa3101) con su visibilidad y fecha de última actualización.",
+      parameters: {
+        type: "object",
+        properties: {},
       },
     },
   },
@@ -188,6 +303,13 @@ CONTEXTO DE MUSA Y MYNEXT:
 - Musa es el fundador, desarrollador principal y director de MyNext (agencia de tecnología, software a medida y desarrollo web de alto impacto con base en Palma de Mallorca).
 - Marca y plataforma insignia: mynextbymusa.com.
 - Sistema operativo interno: NextOS (Next.js 16, InsForge PostgreSQL, Cloudflare Edge CDN, PDFs automáticos).
+- Cuenta y repositorios en GitHub: musa3101 (repositorio principal del sistema: NEXTOS-V2).
+- Filosofía de trabajo: Máxima exigencia estética (dark mode premium, estética luxury suiza / Bento Grid, tipografía impecable) y rendimiento técnico extremo.
+
+ACCESO DIRECTO A GITHUB (musa3101):
+- Tienes acceso total a los repositorios de GitHub de Musa.
+- Si Musa pregunta qué ha pasado en el repo, qué cambios se subieron, o si algo falló, usa 'get_github_activity' o 'get_github_commit_details' para revisar los commits y archivos modificados.
+- Puedes verificar si los builds o workflows pasaron con 'get_github_ci_status' y listar proyectos con 'list_github_repos'.
 - Filosofía de trabajo: Máxima exigencia estética (dark mode premium, estética luxury suiza / Bento Grid, tipografía impecable) y rendimiento técnico extremo.
 
 CLIENTES VIP Y PROYECTOS CLAVE (Webs pagadas y en producción):
@@ -204,7 +326,17 @@ COMPORTAMIENTO Y TONO:
 - NUNCA fuerces a Musa a usar comandos de barra (como /factura o /status) ni sintaxis rígida. Comprende el lenguaje natural libremente.
 - Si Musa te saluda ("Hola", "Qué tal", "Buenas"), salúdalo con calidez y ofrécele ayuda con sus webs, clientes, facturas o proyectos.
 - Facturación: IVA del 21% por defecto. Si faltan datos clave para una factura o propuesta (concepto, precio o link), pregúntale amablemente en una o dos preguntas cortas.
-- Cuando tengas los datos, ejecuta la herramienta correspondiente ('create_invoice', 'create_proposal', 'get_system_health', etc.). Las herramientas de PDF generarán el documento y se lo enviarán como archivo adjunto a su Telegram al instante.
+
+REGLA DE ORO SUPREMA: URL DE LA WEB EN PROPUESTAS Y ENTREGAS (PDFs Interactivos):
+- Todos los documentos de Propuesta comercial ('create_proposal') y de Acta de Entrega de proyecto ('create_delivery') incorporan un botón dorado central [TU WEB] para que el cliente pulse y entre directamente a su web o demo interactiva.
+- POR TANTO, LA URL DE LA WEB ('demoUrl') ES SIEMPRE ESTRICTAMENTE OBLIGATORIA.
+- Si Musa te pide generar una propuesta o un acta de entrega y NO ha proporcionado la URL de la web:
+  ¡ESTÁ TERMINANTEMENTE PROHIBIDO INVENTARTE LA URL O EJECUTAR LA HERRAMIENTA SIN ELLA!
+  DEBES RESPONDERLE AMABLEMENTE PIDIÉNDOLE LA URL DE LA WEB ANTES DE CONTINUAR:
+  "Musa, ¿cuál es la URL de la web para enlazar el botón [TU WEB] interactivo en el PDF?"
+- Solo cuando Musa te dé la URL de la web (o si ya la incluyó en su mensaje), ejecutas la herramienta correspondiente ('create_proposal' o 'create_delivery') para generar el PDF y enviárselo directamente a Telegram.
+
+- Cuando tengas todos los datos, ejecuta la herramienta correspondiente ('create_invoice', 'create_proposal', 'create_delivery', 'get_system_health', etc.). Las herramientas de PDF generarán el documento y se lo enviarán como archivo adjunto a su Telegram al instante.
 - ALERTA CRÍTICA: Si mynextbymusa.com o las webs de sus clientes prioritarios (Ecuaplac, Tacos Marrakech, Gran Marrakech, Blessed Studio, Luna Llena) tienen caídas o problemas, avísale con máxima prioridad.
 - Si Musa te indica algún dato nuevo que recordar, guárdalo con 'remember_user_fact'.
 - Respeta la brevedad adecuada para mensajería de Telegram: mensajes claros, sin rodeos innecesarios y formateados limpiamente.`;
@@ -334,16 +466,53 @@ export async function handleTelegramAI(chatId: number | string, userText: string
 }
 
 /**
- * Call OpenRouter API with automatic model fallback
+ * Call AI API with priority to Google AI Studio (100% free, ultra-fast gemini-3.6-flash)
+ * and automatic fallback to OpenRouter.
  */
 async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
-  const apiKey = process.env.OPENROUTER_API_KEY || OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY no está configurada en las variables de entorno.");
+  const geminiKey = process.env.GEMINI_API_KEY || GEMINI_API_KEY;
+  const openRouterKey = process.env.OPENROUTER_API_KEY || OPENROUTER_API_KEY;
+
+  // 1. Primary Engine: Google AI Studio (100% gratis, sin coste de saldo, ultra-rápido)
+  if (geminiKey) {
+    try {
+      const payload: any = {
+        model: GOOGLE_MODEL,
+        messages,
+      };
+
+      if (tools && tools.length > 0) {
+        payload.tools = tools;
+        payload.tool_choice = "auto";
+      }
+
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${geminiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+
+      const errorText = await res.text();
+      console.warn(`Google AI Studio status ${res.status}: ${errorText}. Activando fallback a OpenRouter...`);
+    } catch (e) {
+      console.warn("Google AI Studio connection error, activando fallback a OpenRouter:", e);
+    }
+  }
+
+  // 2. Fallback Engine: OpenRouter
+  if (!openRouterKey) {
+    throw new Error("Ni GEMINI_API_KEY ni OPENROUTER_API_KEY están configuradas en las variables de entorno.");
   }
 
   const payload: any = {
-    model: PRIMARY_MODEL,
+    model: OPENROUTER_PRIMARY_MODEL,
     messages,
   };
 
@@ -353,7 +522,7 @@ async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
   }
 
   const headers = {
-    "Authorization": `Bearer ${apiKey}`,
+    "Authorization": `Bearer ${openRouterKey}`,
     "Content-Type": "application/json",
     "HTTP-Referer": "https://nextos-v2.vercel.app",
     "X-Title": "NextOS V2 Telegram Assistant",
@@ -370,13 +539,13 @@ async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
       return await res.json();
     }
 
-    console.warn(`OpenRouter primary model ${PRIMARY_MODEL} returned ${res.status}, trying fallback ${FALLBACK_MODEL}...`);
+    console.warn(`OpenRouter primary model ${OPENROUTER_PRIMARY_MODEL} returned ${res.status}, trying fallback ${OPENROUTER_FALLBACK_MODEL}...`);
   } catch (e) {
-    console.warn(`OpenRouter primary model error, trying fallback ${FALLBACK_MODEL}:`, e);
+    console.warn(`OpenRouter primary model error, trying fallback ${OPENROUTER_FALLBACK_MODEL}:`, e);
   }
 
-  // Fallback to high-performance model
-  payload.model = FALLBACK_MODEL;
+  // Fallback to secondary model on OpenRouter
+  payload.model = OPENROUTER_FALLBACK_MODEL;
   const fallbackRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers,
@@ -391,6 +560,7 @@ async function callOpenRouter(messages: any[], tools?: any[]): Promise<any> {
 
   return await fallbackRes.json();
 }
+
 
 /**
  * Tool Execution Dispatcher
@@ -666,7 +836,10 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
     case "create_proposal": {
       try {
         const businessName = args.businessName || "Negocio";
-        const demoUrl = args.demoUrl || "https://mynext.dev";
+        const demoUrl = args.demoUrl;
+        if (!demoUrl) {
+          throw new Error("La URL de la web (demoUrl) es obligatoria para incluir el botón interactivo [TU WEB].");
+        }
 
         // 1. Find or create client
         let clientId: string;
@@ -699,18 +872,25 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
               number,
               template_data: {
                 is_proposal: true,
-                clientName: businessName,
+                clientName: args.clientName || businessName,
                 businessName,
                 demoUrl,
+                adminUrl: args.adminUrl,
+                features: args.features,
               },
             },
           ])
           .select();
 
-        // 4. Render PDF
+        // 4. Render PDF with Luxury MyNext Proposal layout
         const pdfBuffer = await generateProposalPdf({
           businessName,
+          clientName: args.clientName,
           demoUrl,
+          adminUrl: args.adminUrl,
+          features: args.features,
+          introMessage: args.introMessage,
+          closingMessage: args.closingMessage,
           number,
           date: new Date().toLocaleDateString("es-ES"),
         });
@@ -724,7 +904,7 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
             action: "created",
             entityType: "document",
             entityId: docRecord[0].id,
-            details: { number, type: "proposal", businessName },
+            details: { number, type: "proposal", businessName, demoUrl },
             source: "telegram",
           });
         }
@@ -745,12 +925,60 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
       try {
         const clientName = args.clientName || "Cliente";
         const projectName = args.projectName || "Proyecto Web";
-        const deliverables = args.features || args.deliverables || ["Diseño Web Adaptativo", "Alojamiento Cloudflare CDN", "Certificado SSL HTTPS"];
+        const demoUrl = args.demoUrl || args.webUrl;
+        if (!demoUrl) {
+          throw new Error("La URL de la web (demoUrl) es obligatoria para incluir el botón interactivo [TU WEB].");
+        }
+
+        const deliverables = args.deliverables || args.features || [
+          "Diseño Web Adaptativo y optimización Mobile-First",
+          "Optimización SEO y posicionamiento local",
+          "Alojamiento de ultra-alta velocidad en Cloudflare CDN",
+          "Certificado de seguridad SSL HTTPS activo",
+          "Formulario de contacto y enlaces directos a WhatsApp",
+        ];
 
         const year = new Date().getFullYear();
         const randHex = Math.floor(Math.random() * 0xffff).toString(16).toUpperCase().padStart(4, "0");
         const number = `ENT-${year}-${randHex}`;
 
+        // 1. Save document in database
+        let clientId: string;
+        const { data: existingClient } = await (insforgeAdmin.from("clients") as any)
+          .select("id")
+          .ilike("name", `%${clientName}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (existingClient?.id) {
+          clientId = existingClient.id;
+        } else {
+          const { data: created } = await (insforgeAdmin.from("clients") as any)
+            .insert([{ name: clientName, company: clientName, status: "active" }])
+            .select();
+          clientId = created?.[0]?.id || "";
+        }
+
+        const { data: docRecord } = await (insforgeAdmin.from("documents") as any)
+          .insert([
+            {
+              client_id: clientId || null,
+              type: "delivery",
+              number,
+              template_data: {
+                is_proposal: false,
+                clientName,
+                projectName,
+                demoUrl,
+                adminUrl: args.adminUrl,
+                deliverables,
+                summary: args.summary,
+              },
+            },
+          ])
+          .select();
+
+        // 2. Render Delivery PDF
         const pdfBuffer = await generateDeliveryPdf({
           number,
           date: new Date().toLocaleDateString("es-ES"),
@@ -760,17 +988,34 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
           },
           project: {
             name: projectName,
+            demoUrl,
+            adminUrl: args.adminUrl,
           },
           deliverables,
+          summary: args.summary,
+          closingMessage: args.closingMessage,
         });
 
+        // 3. Send to Telegram
         await sendDocument(chatId, pdfBuffer, `${number}.pdf`);
+
+        // 4. Log activity
+        if (docRecord?.[0]?.id) {
+          await logActivity({
+            action: "created",
+            entityType: "document",
+            entityId: docRecord[0].id,
+            details: { number, type: "delivery", clientName, projectName, demoUrl },
+            source: "telegram",
+          });
+        }
 
         return {
           success: true,
           number,
           clientName,
           projectName,
+          demoUrl,
           pdfSent: true,
         };
       } catch (err: any) {
@@ -778,10 +1023,80 @@ async function executeTool(name: string, args: any, chatId: number | string): Pr
       }
     }
 
+    case "get_github_activity": {
+      try {
+        const repo = args.repo || "NEXTOS-V2";
+        const limit = args.limit || 5;
+        const commits = await getLatestCommits(repo, limit);
+        const repoInfo = await getRepositoryStatus(repo);
+        return {
+          repo,
+          defaultBranch: repoInfo.defaultBranch,
+          openIssues: repoInfo.openIssuesCount,
+          lastPushedAt: repoInfo.pushedAt,
+          recentCommits: commits,
+        };
+      } catch (err: any) {
+        return { error: err.message };
+      }
+    }
+
+    case "get_github_commit_details": {
+      try {
+        const repo = args.repo || "NEXTOS-V2";
+        const details = await getCommitDetails(args.sha, repo);
+        if (!details) return { error: `No se encontró el commit ${args.sha} en ${repo}` };
+        return {
+          sha: details.sha,
+          author: details.author,
+          date: details.date,
+          message: details.message,
+          totalFilesChanged: details.files.length,
+          stats: details.stats,
+          changedFiles: details.files.map((f: any) => ({
+            file: f.filename,
+            status: f.status,
+            additions: f.additions,
+            deletions: f.deletions,
+            snippet: f.patchSnippet,
+          })),
+        };
+      } catch (err: any) {
+        return { error: err.message };
+      }
+    }
+
+    case "get_github_ci_status": {
+      try {
+        const repo = args.repo || "NEXTOS-V2";
+        const runs = await getWorkflowRuns(repo);
+        return {
+          repo,
+          totalRunsFound: runs.totalCount,
+          runs: runs.runs || [],
+        };
+      } catch (err: any) {
+        return { error: err.message };
+      }
+    }
+
+    case "list_github_repos": {
+      try {
+        const repos = await listUserRepositories(10);
+        return {
+          total: repos.length,
+          repos,
+        };
+      } catch (err: any) {
+        return { error: err.message };
+      }
+    }
+
     default:
       return { error: `Herramienta desconocida: ${name}` };
   }
 }
+
 
 // ============================================================
 // MULTIMODAL SUPPORT (Images + Voice/Audio)
