@@ -14,8 +14,8 @@ import {
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Primary direct free engine: Google AI Studio gemini-3.6-flash (100% gratis, multimodal y con function calling)
-const GOOGLE_MODEL = "gemini-3.6-flash";
+// Primary direct free engine: Google AI Studio gemini-flash-latest / gemini-3.6-flash
+const GOOGLE_MODEL = "gemini-flash-latest";
 // Fallbacks en OpenRouter si Google estuviera saturado
 const OPENROUTER_PRIMARY_MODEL = process.env.OPENROUTER_CHAT_MODEL || "google/gemini-2.5-flash";
 const OPENROUTER_FALLBACK_MODEL = "meta-llama/llama-3.3-70b-instruct";
@@ -298,6 +298,13 @@ const AI_TOOLS = [
 // Base System Prompt
 const SYSTEM_PROMPT = `Eres el Asistente Ejecutivo de Inteligencia Artificial de NextOS y MyNext, diseñado exclusivamente para Musa.
 Tu propósito es actuar como su copiloto de confianza, proactivo, resolutivo y eficiente en Telegram.
+
+IDENTIDAD Y CAPACIDADES MULTIMODALES:
+- Eres NextOS AI, el asistente ejecutivo de Musa Abdul.
+- Tu motor de Inteligencia Artificial es Google Gemini 3.6 Flash de Google DeepMind.
+- Tienes capacidad COMPLETA Y VERIFICADA para procesar texto, analizar imágenes/fotos y escuchar notas de voz/audios en tiempo real.
+- Si Musa te pregunta qué modelo eres, qué versión usas o te pide nombre y número del modelo, responde con total claridad: "Soy NextOS AI, impulsado por Google Gemini 3.6 Flash de Google DeepMind. Cuento con capacidad total para texto, análisis de imágenes y comprensión de notas de voz en tiempo real."
+- NUNCA digas que eres Gemini 1.0 Pro ni que no puedes procesar audios, porque eres Gemini 3.6 Flash multimodal.
 
 CONTEXTO DE MUSA Y MYNEXT:
 - Musa es el fundador, desarrollador principal y director de MyNext (agencia de tecnología, software a medida y desarrollo web de alto impacto con base en Palma de Mallorca).
@@ -1162,7 +1169,114 @@ export async function handleTelegramAIMultimodal(
       content: m.content,
     }));
 
-    // 4. Build multimodal content for the current message
+    // 4a. If audio: transcribe natively using Google Gemini 3.6 Flash
+    if (input.type === "audio") {
+      const geminiKey = process.env.GEMINI_API_KEY || GEMINI_API_KEY;
+      if (geminiKey) {
+        try {
+          const rawBase64 = input.base64DataUri.includes(",")
+            ? input.base64DataUri.split(",")[1]
+            : input.base64DataUri;
+
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        inline_data: {
+                          mime_type: input.mimeType.includes("ogg") ? "audio/ogg" : input.mimeType,
+                          data: rawBase64,
+                        },
+                      },
+                      {
+                        text: "Escucha atentamente este audio en español. Transcribe ÚNICAMENTE lo que dice la persona palabra por palabra. No añadas notas, comentarios, explicaciones ni comillas. Si no hay voz o es ininteligible, responde: [SILENCIO]",
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const transcribed = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (transcribed && transcribed !== "[SILENCIO]" && transcribed.length > 0) {
+              console.log("[Telegram Audio Transcribed]:", transcribed);
+              // Delegate to standard conversational handleTelegramAI with the transcribed speech
+              await handleTelegramAI(chatId, `🎙️ "${transcribed}"`);
+              return;
+            }
+          } else {
+            console.warn("Gemini audio transcription failed with status:", res.status, await res.text());
+          }
+        } catch (audioErr) {
+          console.error("Gemini audio transcription exception:", audioErr);
+        }
+      }
+    }
+
+    // 4b. If image: analyze directly using Google Gemini 3.6 Flash
+    if (input.type === "image") {
+      const geminiKey = process.env.GEMINI_API_KEY || GEMINI_API_KEY;
+      if (geminiKey) {
+        try {
+          const rawBase64 = input.base64DataUri.includes(",")
+            ? input.base64DataUri.split(",")[1]
+            : input.base64DataUri;
+
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                system_instruction: {
+                  parts: [{ text: SYSTEM_PROMPT + persistentMemoryText }],
+                },
+                contents: [
+                  {
+                    role: "user",
+                    parts: [
+                      {
+                        inline_data: {
+                          mime_type: input.mimeType || "image/jpeg",
+                          data: rawBase64,
+                        },
+                      },
+                      {
+                        text: input.userText || "Analiza detalladamente esta imagen para Musa Abdul.",
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (reply) {
+              await (insforgeAdmin.from("telegram_messages") as any).insert([
+                { chat_id: chatIdStr, role: "assistant", content: reply },
+              ]);
+              await sendMessage(chatId, reply);
+              return;
+            }
+          }
+        } catch (imgErr) {
+          console.error("Gemini image analysis exception:", imgErr);
+        }
+      }
+    }
+
+    // 4c. Fallback for OpenRouter multimodal
     const multimodalContent: any[] = [];
 
     if (input.type === "image") {
@@ -1171,7 +1285,6 @@ export async function handleTelegramAIMultimodal(
         image_url: { url: input.base64DataUri },
       });
     } else if (input.type === "audio") {
-      // For audio: Gemini on OpenRouter supports input_audio content parts
       multimodalContent.push({
         type: "input_audio",
         input_audio: {
@@ -1190,7 +1303,7 @@ export async function handleTelegramAIMultimodal(
     // 5. Assemble messages for LLM
     const messages: any[] = [
       { role: "system", content: SYSTEM_PROMPT + persistentMemoryText },
-      ...history.slice(0, -1), // History except the last (which is the current multimodal message label)
+      ...history.slice(0, -1),
       {
         role: "user",
         content: multimodalContent,
