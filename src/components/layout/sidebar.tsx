@@ -6,9 +6,9 @@ import {
   LayoutDashboard, 
   Users, 
   FolderKanban, 
+  CalendarClock,
   FileText, 
-  Activity, 
-  ActivitySquare, 
+  ShieldCheck, 
   LogOut 
 } from "lucide-react";
 
@@ -19,9 +19,9 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Clientes", href: "/clients", icon: Users },
   { name: "Proyectos", href: "/projects", icon: FolderKanban },
+  { name: "Mantenimiento", href: "/maintenance", icon: CalendarClock },
   { name: "Documentos", href: "/documents", icon: FileText },
-  { name: "Actividad", href: "/activity", icon: Activity },
-  { name: "Monitorización", href: "/monitoring", icon: ActivitySquare },
+  { name: "Monitorización", href: "/monitoring", icon: ShieldCheck },
 ];
 
 interface SidebarProps {
@@ -56,7 +56,7 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
               className="w-7 h-7 object-contain rounded-md border border-[#333] p-0.5 bg-[#111] group-hover:scale-105 transition-transform" 
             />
             <span className="text-lg font-bold tracking-widest text-white">
-              Next <span className="text-[#D4A853]">LaB</span>
+              NEXT<span className="text-[#D4A853]">OS</span>
             </span>
           </Link>
         </div>

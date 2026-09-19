@@ -1,13 +1,14 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { getLogoBlackSource } from './assets';
 
 export interface InvoiceData {
   number: string;
-  date: string;
-  dueDate: string;
+  date?: string;
+  dueDate?: string;
   client: {
     name: string;
-    company: string;
+    company?: string;
     email?: string;
     phone?: string;
     address?: string;
@@ -17,244 +18,298 @@ export interface InvoiceData {
     quantity: number;
     unitPrice: number;
   }>;
-  taxRate: number; // e.g., 21 for 21%
+  taxRate?: number; // e.g. 21 for 21%
 }
 
 const invoiceStyles = StyleSheet.create({
   page: {
-    padding: 36,
-    backgroundColor: '#FAF8F5',
+    paddingTop: 28,
+    paddingBottom: 22,
+    paddingHorizontal: 38,
+    backgroundColor: '#F8F7F4',
     fontFamily: 'Helvetica',
     color: '#000000',
+    justifyContent: 'space-between',
   },
   // Top Header Row
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 20,
+    marginBottom: 14,
   },
   titleContainer: {
     flexDirection: 'column',
   },
   titleText: {
-    fontSize: 34,
+    fontSize: 32,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: -0.5,
-    marginBottom: 6,
+    marginBottom: 4,
     color: '#000000',
   },
   numberPill: {
     borderWidth: 1.5,
     borderColor: '#000000',
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 3,
     alignSelf: 'flex-start',
   },
   numberText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontFamily: 'Helvetica-Bold',
     color: '#000000',
   },
   logoBadge: {
     backgroundColor: '#000000',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoText: {
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: 'Helvetica-Bold',
-    color: '#FAF8F5',
+    color: '#FFFFFF',
     letterSpacing: 2,
   },
   logoAccent: {
-    color: '#D4A853',
+    color: '#C8A86B',
   },
 
-  // Client & Company Info Box
+  // Client & Company Box
   infoBox: {
     borderWidth: 1.5,
     borderColor: '#000000',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: 10,
     flexDirection: 'row',
-    marginBottom: 22,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+    backgroundColor: 'transparent',
   },
   infoColLeft: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 14,
+    borderRightWidth: 1,
+    borderRightColor: '#000000',
   },
   infoColRight: {
     flex: 1,
-    paddingLeft: 16,
-    borderLeftWidth: 1.5,
-    borderLeftColor: '#000000',
+    paddingLeft: 14,
     alignItems: 'flex-end',
   },
-  sectionTitle: {
-    fontSize: 10,
+  sectionTitleLeft: {
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: 0.8,
     marginBottom: 6,
     color: '#000000',
+    textAlign: 'left',
   },
-  infoText: {
-    fontSize: 10,
-    lineHeight: 1.45,
-    color: '#1A1A1A',
+  sectionTitleRight: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+    color: '#000000',
+    textAlign: 'right',
   },
   infoTextBold: {
     fontSize: 10,
     fontFamily: 'Helvetica-Bold',
-    lineHeight: 1.45,
     color: '#000000',
+    marginBottom: 2,
+  },
+  infoText: {
+    fontSize: 9,
+    color: '#111111',
+    lineHeight: 1.3,
+    marginBottom: 1,
   },
 
-  // Table
+  // Line Items Table
   tableContainer: {
-    marginBottom: 16,
+    marginBottom: 2,
   },
   tableHeader: {
-    backgroundColor: '#000000',
     flexDirection: 'row',
-    paddingVertical: 8,
+    backgroundColor: '#000000',
+    borderRadius: 3,
+    paddingVertical: 6,
     paddingHorizontal: 12,
   },
   tableHeaderText: {
-    color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
+    color: '#FFFFFF',
   },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 9,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
-  colDetalle: { width: '52%' },
-  colCantidad: { width: '16%', textAlign: 'center' },
-  colPrecio: { width: '16%', textAlign: 'right' },
-  colTotal: { width: '16%', textAlign: 'right' },
   cellText: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#111111',
+  },
+  colDetalle: {
+    flex: 3.2,
+    textAlign: 'left',
+  },
+  colCantidad: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  colPrecio: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  colTotal: {
+    flex: 1,
+    textAlign: 'right',
   },
   dividerLine: {
     borderBottomWidth: 2,
     borderBottomColor: '#000000',
-    marginVertical: 10,
+    marginTop: 2,
+    marginBottom: 8,
   },
 
   // Total Bar
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginBottom: 24,
+    marginBottom: 14,
   },
   totalBox: {
     backgroundColor: '#000000',
+    borderRadius: 3,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: 250,
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 18,
+    width: 180,
   },
   totalLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
+    color: '#FFFFFF',
     letterSpacing: 1,
   },
   totalAmount: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 10.5,
     fontFamily: 'Helvetica-Bold',
+    color: '#FFFFFF',
   },
 
-  // Payment & Thank You Bottom Cards
+  // Payment & Thank You Row
   bottomCardsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    alignItems: 'stretch',
+    marginBottom: 14,
+    gap: 14,
   },
   paymentBox: {
+    flex: 1.25,
     borderWidth: 1.5,
     borderColor: '#000000',
-    borderRadius: 14,
-    padding: 12,
-    width: '56%',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   paymentTitle: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
-    letterSpacing: 0.8,
-    marginBottom: 6,
-    color: '#000000',
     textAlign: 'center',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+    color: '#000000',
   },
   paymentText: {
-    fontSize: 9.5,
-    lineHeight: 1.5,
-    color: '#111111',
+    fontSize: 8,
+    color: '#222222',
+    lineHeight: 1.3,
+    marginBottom: 1.5,
   },
   paymentTextBold: {
-    fontSize: 9.5,
     fontFamily: 'Helvetica-Bold',
     color: '#000000',
   },
+  ibanText: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#000000',
+    marginTop: 3,
+    letterSpacing: 0.5,
+  },
   thankYouBox: {
+    flex: 0.95,
     backgroundColor: '#000000',
-    borderRadius: 4,
-    padding: 16,
-    width: '40%',
+    borderRadius: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  thankYouText: {
-    color: '#D4A853',
-    fontSize: 13,
+  thankYouWhite: {
+    fontSize: 10.5,
     fontFamily: 'Helvetica-Bold',
+    color: '#FFFFFF',
+    letterSpacing: 1.2,
     textAlign: 'center',
-    lineHeight: 1.4,
-    letterSpacing: 0.5,
+    lineHeight: 1.35,
+  },
+  thankYouGold: {
+    fontSize: 12.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#C8A86B',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginTop: 2,
   },
 
-  // Footer Brand Mark
+  // Footer Monogram & Pill
   footerContainer: {
     alignItems: 'center',
     marginTop: 'auto',
-    paddingTop: 10,
   },
-  footerBrandMark: {
-    fontSize: 18,
-    fontFamily: 'Helvetica-Bold',
-    color: '#000000',
-    letterSpacing: 3,
+  monogramImage: {
+    width: 50,
+    height: 50,
     marginBottom: 6,
   },
   webPill: {
     borderWidth: 1.5,
     borderColor: '#000000',
-    borderRadius: 14,
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 5,
+    paddingVertical: 3,
   },
   webPillText: {
-    fontSize: 9,
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
     color: '#000000',
   },
 });
 
 export const InvoiceTemplate = ({ data }: { data: InvoiceData }) => {
-  const subtotal = data.items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0);
-  const taxAmount = (subtotal * (data.taxRate || 0)) / 100;
-  const total = subtotal + taxAmount;
+  const items = data.items && data.items.length > 0 ? data.items : [];
+  const subtotal = items.reduce(
+    (sum, item) => sum + (Number(item.quantity || 1) * Number(item.unitPrice || 0)),
+    0
+  );
+  const taxRate = typeof data.taxRate === 'number' ? data.taxRate : 0;
+  const total = subtotal + (subtotal * taxRate) / 100;
+
+  const clientTitle = data.client?.company || data.client?.name || 'Cliente';
+  const clientName = data.client?.name && data.client?.name !== data.client?.company ? data.client.name : undefined;
 
   return (
     <Document>
@@ -269,25 +324,25 @@ export const InvoiceTemplate = ({ data }: { data: InvoiceData }) => {
           </View>
 
           <View style={invoiceStyles.logoBadge}>
-            <Text style={invoiceStyles.logoText}>MY<Text style={invoiceStyles.logoAccent}>NEXT</Text></Text>
+            <Text style={invoiceStyles.logoText}>
+              MY<Text style={invoiceStyles.logoAccent}>NEXT</Text>
+            </Text>
           </View>
         </View>
 
         {/* Client & Company Card */}
         <View style={invoiceStyles.infoBox}>
           <View style={invoiceStyles.infoColLeft}>
-            <Text style={invoiceStyles.sectionTitle}>DATOS DEL CLIENTE</Text>
-            <Text style={invoiceStyles.infoTextBold}>{data.client.company || data.client.name}</Text>
-            {data.client.name && data.client.name !== data.client.company && (
-              <Text style={invoiceStyles.infoText}>{data.client.name}</Text>
-            )}
-            {data.client.email && <Text style={invoiceStyles.infoText}>{data.client.email}</Text>}
-            {data.client.phone && <Text style={invoiceStyles.infoText}>{data.client.phone}</Text>}
-            {data.client.address && <Text style={invoiceStyles.infoText}>{data.client.address}</Text>}
+            <Text style={invoiceStyles.sectionTitleLeft}>DATOS DEL CLIENTE</Text>
+            <Text style={invoiceStyles.infoTextBold}>{clientTitle}</Text>
+            {clientName && <Text style={invoiceStyles.infoText}>{clientName}</Text>}
+            {data.client?.email && <Text style={invoiceStyles.infoText}>{data.client.email}</Text>}
+            {data.client?.phone && <Text style={invoiceStyles.infoText}>{data.client.phone}</Text>}
+            <Text style={invoiceStyles.infoText}>{data.client?.address || 'Palma de Mallorca'}</Text>
           </View>
 
           <View style={invoiceStyles.infoColRight}>
-            <Text style={invoiceStyles.sectionTitle}>DATOS DE LA EMPRESA</Text>
+            <Text style={invoiceStyles.sectionTitleRight}>DATOS DE LA EMPRESA</Text>
             <Text style={invoiceStyles.infoTextBold}>Mynext</Text>
             <Text style={invoiceStyles.infoText}>Mynextbymusa@gmail.com</Text>
             <Text style={invoiceStyles.infoText}>+34673109486</Text>
@@ -304,14 +359,21 @@ export const InvoiceTemplate = ({ data }: { data: InvoiceData }) => {
             <Text style={[invoiceStyles.tableHeaderText, invoiceStyles.colTotal]}>Total</Text>
           </View>
 
-          {data.items.map((item, index) => (
-            <View style={invoiceStyles.tableRow} key={index}>
-              <Text style={[invoiceStyles.cellText, invoiceStyles.colDetalle]}>{item.description}</Text>
-              <Text style={[invoiceStyles.cellText, invoiceStyles.colCantidad]}>{String(item.quantity).padStart(2, '0')}</Text>
-              <Text style={[invoiceStyles.cellText, invoiceStyles.colPrecio]}>{item.unitPrice}€</Text>
-              <Text style={[invoiceStyles.cellText, invoiceStyles.colTotal]}>{(item.quantity * item.unitPrice)}€</Text>
-            </View>
-          ))}
+          {items.map((item, index) => {
+            const q = Number(item.quantity || 1);
+            const p = Number(item.unitPrice || 0);
+            const t = q * p;
+            return (
+              <View style={invoiceStyles.tableRow} key={index}>
+                <Text style={[invoiceStyles.cellText, invoiceStyles.colDetalle]}>{item.description}</Text>
+                <Text style={[invoiceStyles.cellText, invoiceStyles.colCantidad]}>
+                  {String(q).padStart(2, '0')}
+                </Text>
+                <Text style={[invoiceStyles.cellText, invoiceStyles.colPrecio]}>{p}€</Text>
+                <Text style={[invoiceStyles.cellText, invoiceStyles.colTotal]}>{t}€</Text>
+              </View>
+            );
+          })}
         </View>
 
         <View style={invoiceStyles.dividerLine} />
@@ -328,22 +390,28 @@ export const InvoiceTemplate = ({ data }: { data: InvoiceData }) => {
         <View style={invoiceStyles.bottomCardsRow}>
           <View style={invoiceStyles.paymentBox}>
             <Text style={invoiceStyles.paymentTitle}>INFORMACIÓN DE PAGO</Text>
-            <Text style={invoiceStyles.paymentText}><Text style={invoiceStyles.paymentTextBold}>Banco:</Text> Revolut</Text>
-            <Text style={invoiceStyles.paymentText}><Text style={invoiceStyles.paymentTextBold}>Nombre:</Text> Musa Abdul</Text>
             <Text style={invoiceStyles.paymentText}>
-              <Text style={invoiceStyles.paymentTextBold}>Ref:</Text> {data.client.company || data.client.name} - Factura N° {data.number}
+              <Text style={invoiceStyles.paymentTextBold}>Banco: </Text>Revolut
             </Text>
-            <Text style={invoiceStyles.paymentTextBold}>ES3915830001159018860090</Text>
+            <Text style={invoiceStyles.paymentText}>
+              <Text style={invoiceStyles.paymentTextBold}>Nombre: </Text>Musa Abdul
+            </Text>
+            <Text style={invoiceStyles.paymentText}>
+              <Text style={invoiceStyles.paymentTextBold}>Ref: </Text>{clientTitle} - Factura Nº {data.number}
+            </Text>
+            <Text style={invoiceStyles.ibanText}>ES3915830001159018860090</Text>
           </View>
 
           <View style={invoiceStyles.thankYouBox}>
-            <Text style={invoiceStyles.thankYouText}>GRACIAS POR CONFIAR EN MYNEXT</Text>
+            <Text style={invoiceStyles.thankYouWhite}>GRACIAS POR</Text>
+            <Text style={invoiceStyles.thankYouWhite}>CONFIAR EN</Text>
+            <Text style={invoiceStyles.thankYouGold}>MYNEXT</Text>
           </View>
         </View>
 
         {/* Footer Brand Mark & Pill */}
         <View style={invoiceStyles.footerContainer}>
-          <Text style={invoiceStyles.footerBrandMark}>MN</Text>
+          <Image src={getLogoBlackSource()} style={invoiceStyles.monogramImage} />
           <View style={invoiceStyles.webPill}>
             <Text style={invoiceStyles.webPillText}>WWW.MYNEXTBYMUSA.COM</Text>
           </View>

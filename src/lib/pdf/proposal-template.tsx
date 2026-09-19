@@ -1,221 +1,294 @@
 import React from 'react';
-import { Document, Page, Text, View, Link, StyleSheet } from '@react-pdf/renderer';
-import { colors } from './shared-styles';
+import { Document, Page, Text, View, Link, StyleSheet, Image } from '@react-pdf/renderer';
+import { getLogoDarkSource } from './assets';
 
 export interface ProposalData {
+  number?: string;
+  date?: string;
   businessName: string;
-  demoUrl: string;
-  number: string;
-  date: string;
+  clientName?: string;
+  demoUrl: string; // OBLIGATORIO para que el cliente pulse y acceda
+  adminUrl?: string;
+  introMessage?: string;
+  features?: string[];
+  closingMessage?: string;
 }
 
-const localStyles = StyleSheet.create({
+const proposalStyles = StyleSheet.create({
   page: {
-    padding: 50,
-    backgroundColor: colors.background,
+    paddingTop: 30,
+    paddingBottom: 22,
+    paddingHorizontal: 38,
+    backgroundColor: '#09090B',
     fontFamily: 'Helvetica',
-    color: colors.text,
+    color: '#FFFFFF',
     position: 'relative',
-  },
-  header: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingBottom: 20,
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text,
-    letterSpacing: 2,
+  // Inset Gold Border Frame (como en el PDF real de MyNext)
+  outerBorder: {
+    position: 'absolute',
+    top: 14,
+    left: 14,
+    right: 14,
+    bottom: 14,
+    borderWidth: 1,
+    borderColor: '#382F1D',
+    pointerEvents: 'none',
   },
-  logoAccent: {
-    color: colors.primary,
-  },
-  companyDetails: {
-    fontSize: 9,
-    color: colors.textSecondary,
-    textAlign: 'right',
-    lineHeight: 1.4,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: colors.primary,
-    letterSpacing: 3,
-    marginBottom: 40,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: colors.text,
-  },
-  paragraph: {
-    fontSize: 12,
-    lineHeight: 1.8,
-    color: colors.text,
-    marginBottom: 25,
-  },
-  buttonContainer: {
+
+  // Header Banner
+  headerContainer: {
     alignItems: 'center',
-    marginVertical: 35,
+    marginBottom: 12,
   },
-  buttonText: {
-    fontSize: 10,
-    color: colors.textSecondary,
-    marginBottom: 10,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    color: '#000000',
-    padding: '12 36',
-    borderRadius: 5,
-    fontSize: 12,
-    fontWeight: 'bold',
-    textDecoration: 'none',
-  },
-  signoff: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: colors.primary,
-    marginTop: 30,
-    marginBottom: 40,
-  },
-  monogramContainer: {
+  logoRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40,
-    opacity: 0.1,
+    marginBottom: 4,
+    width: '100%',
   },
-  monogramText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: colors.textSecondary,
+  sideLine: {
+    width: 65,
+    height: 1,
+    backgroundColor: '#C5A059',
+  },
+  mainLogo: {
+    fontSize: 24,
+    fontFamily: 'Helvetica-Bold',
     letterSpacing: 4,
+    marginHorizontal: 16,
+    color: '#FFFFFF',
   },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 50,
-    right: 50,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 15,
+  logoAccent: {
+    color: '#C5A059',
   },
-  footerText: {
-    fontSize: 8,
-    color: colors.textSecondary,
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#C5A059',
+    letterSpacing: 4,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+  },
+
+  // Main Content Section
+  contentSection: {
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    marginVertical: 'auto',
+  },
+  greetingText: {
+    fontSize: 17,
+    fontFamily: 'Helvetica-Bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  bodyText: {
+    fontSize: 10,
+    lineHeight: 1.55,
+    textAlign: 'center',
+    color: '#CCCCCC',
+    marginBottom: 14,
+    maxWidth: 460,
+  },
+  highlightBusiness: {
+    fontFamily: 'Helvetica-Bold',
+    color: '#C5A059',
+  },
+
+  // CTA Demo Button
+  ctaContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  ctaLabel: {
+    fontSize: 9.5,
+    color: '#CCCCCC',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    gap: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goldButton: {
+    backgroundColor: '#C5A059',
+    borderRadius: 3,
+    paddingVertical: 9,
+    paddingHorizontal: 30,
+    textDecoration: 'none',
+    alignSelf: 'center',
+  },
+  goldButtonText: {
+    fontSize: 10.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#000000',
+    letterSpacing: 1.5,
+    textAlign: 'center',
+  },
+  adminButton: {
+    backgroundColor: '#1E1E24',
+    borderWidth: 1,
+    borderColor: '#C5A059',
+    borderRadius: 3,
+    paddingVertical: 9,
+    paddingHorizontal: 22,
+    textDecoration: 'none',
+  },
+  adminButtonText: {
+    fontSize: 9.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#C5A059',
+    letterSpacing: 1.5,
+    textAlign: 'center',
+  },
+
+  // Feature Highlights List (opcional)
+  featuresBox: {
+    backgroundColor: '#121216',
+    borderWidth: 1,
+    borderColor: '#222228',
+    borderRadius: 5,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    marginVertical: 8,
+    width: '100%',
+    maxWidth: 460,
+  },
+  featureItem: {
+    fontSize: 9,
+    lineHeight: 1.45,
+    color: '#DDDDDD',
+    marginBottom: 3,
+  },
+  bulletGold: {
+    color: '#C5A059',
+    fontFamily: 'Helvetica-Bold',
+  },
+
+  // Closing Note
+  closingText: {
+    fontSize: 9.5,
+    lineHeight: 1.45,
+    textAlign: 'center',
+    color: '#CCCCCC',
+    marginTop: 10,
+    maxWidth: 460,
+  },
+  thankYouText: {
+    fontSize: 10.5,
+    fontFamily: 'Helvetica-Bold',
+    textAlign: 'center',
+    color: '#C5A059',
+    letterSpacing: 0.5,
+    marginTop: 10,
+  },
+
+  // Footer Monogram & Made By
+  footerContainer: {
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  monogramWatermark: {
+    width: 54,
+    height: 54,
+    marginBottom: 5,
+  },
+  goldLine: {
+    width: 220,
+    height: 1,
+    backgroundColor: '#C5A059',
+    marginBottom: 5,
+  },
+  madeByText: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 3,
+    color: '#888888',
+    textTransform: 'uppercase',
   },
 });
 
 export const ProposalTemplate = ({ data }: { data: ProposalData }) => {
+  const clientGreeting = data.clientName
+    ? `¡Hola ${data.clientName}, es un placer saludarte!`
+    : 'Hola, es un placer saludarte!';
+
+  const demoUrl = data.demoUrl || 'https://www.mynextbymusa.com';
+
+  const intro =
+    data.introMessage ||
+    `Te comparto este prototipo interactivo para ${data.businessName}. He preparado esta propuesta enfocada en optimizar la experiencia de usuario y elevar la imagen de tu marca al máximo nivel.`;
+
+  const closing =
+    data.closingMessage ||
+    'Échale un vistazo con calma, pruébala bien y mírale todos los detalles. Si encuentras cualquier cosa que quieras cambiar, ajustar o añadir, avísame y lo modifico. ¡Espero que te guste mucho el resultado!';
+
   return (
     <Document>
-      {/* PAGE 1: SPANISH */}
-      <Page size="A4" style={localStyles.page}>
-        {/* Header */}
-        <View style={localStyles.header}>
-          <View>
-            <Text style={localStyles.logoText}>MY<Text style={localStyles.logoAccent}>NEXT</Text></Text>
+      <Page size="A4" style={proposalStyles.page}>
+        <View style={proposalStyles.outerBorder} />
+
+        {/* Top Header */}
+        <View style={proposalStyles.headerContainer}>
+          <View style={proposalStyles.logoRow}>
+            <View style={proposalStyles.sideLine} />
+            <Text style={proposalStyles.mainLogo}>
+              MY<Text style={proposalStyles.logoAccent}>NEXT</Text>
+            </Text>
+            <View style={proposalStyles.sideLine} />
           </View>
-          <View style={localStyles.companyDetails}>
-            <Text>MyNext Software Solutions</Text>
-            <Text>info@mynext.dev</Text>
-            <Text>www.mynext.dev</Text>
+          <Text style={proposalStyles.subtitle}>PROJECT DELIVERY</Text>
+        </View>
+
+        {/* Main Content */}
+        <View style={proposalStyles.contentSection}>
+          <Text style={proposalStyles.greetingText}>{clientGreeting}</Text>
+
+          <Text style={proposalStyles.bodyText}>
+            {intro}
+          </Text>
+
+          {/* Gold Clickable CTA Button */}
+          <View style={proposalStyles.ctaContainer}>
+            <Text style={proposalStyles.ctaLabel}>Accede a la demo aquí:</Text>
+            <View style={proposalStyles.buttonsRow}>
+              <Link src={demoUrl} style={proposalStyles.goldButton}>
+                <Text style={proposalStyles.goldButtonText}>TU WEB</Text>
+              </Link>
+              {data.adminUrl && (
+                <Link src={data.adminUrl} style={proposalStyles.adminButton}>
+                  <Text style={proposalStyles.adminButtonText}>PANEL ADMIN</Text>
+                </Link>
+              )}
+            </View>
           </View>
+
+          {/* Optional Feature Highlights */}
+          {data.features && data.features.length > 0 && (
+            <View style={proposalStyles.featuresBox}>
+              {data.features.map((feat, i) => (
+                <Text key={i} style={proposalStyles.featureItem}>
+                  <Text style={proposalStyles.bulletGold}>• </Text>{feat}
+                </Text>
+              ))}
+            </View>
+          )}
+
+          <Text style={proposalStyles.closingText}>{closing}</Text>
+
+          <Text style={proposalStyles.thankYouText}>Gracias por confiar en MYNEXT.</Text>
         </View>
 
-        <Text style={localStyles.subtitle}>PROJECT DELIVERY</Text>
-
-        <Text style={localStyles.title}>Hola, es un placer saludarte!</Text>
-
-        <Text style={localStyles.paragraph}>
-          Me apasiona ver crecer a los negocios locales y, tras explorar un poco sobre tu maravillosa empresa y sus valores, me sentí inspirado.
-        </Text>
-        
-        <Text style={localStyles.paragraph}>
-          Sin ningún compromiso, he preparado esta previsualización de cómo podría lucir tu presencia online, para que veas el potencial de MYNEXT para <Text style={{ color: colors.primary, fontWeight: 'bold' }}>{data.businessName}</Text>.
-        </Text>
-
-        <View style={localStyles.buttonContainer}>
-          <Text style={localStyles.buttonText}>Accede a la demo aquí 👇</Text>
-          <Link src={data.demoUrl} style={localStyles.button}>
-            [ACCEDER A LA DEMO]
-          </Link>
-        </View>
-
-        <Text style={localStyles.paragraph}>
-          Por favor, revisa el contenido y los detalles técnicos. Quedo a la espera de tus comentarios para proceder con los ajustes finales y la entrega definitiva una vez completado el proceso administrativo.
-        </Text>
-
-        <Text style={localStyles.signoff}>Gracias por confiar en MYNEXT.</Text>
-
-        {/* Monogram Watermark */}
-        <View style={localStyles.monogramContainer}>
-          <Text style={localStyles.monogramText}>MN</Text>
-        </View>
-
-        {/* Footer */}
-        <View style={localStyles.footer}>
-          <Text style={localStyles.footerText}>MADE BY MYNEXT</Text>
-        </View>
-      </Page>
-
-      {/* PAGE 2: ENGLISH */}
-      <Page size="A4" style={localStyles.page}>
-        {/* Header */}
-        <View style={localStyles.header}>
-          <View>
-            <Text style={localStyles.logoText}>MY<Text style={localStyles.logoAccent}>NEXT</Text></Text>
-          </View>
-          <View style={localStyles.companyDetails}>
-            <Text>MyNext Software Solutions</Text>
-            <Text>info@mynext.dev</Text>
-            <Text>www.mynext.dev</Text>
-          </View>
-        </View>
-
-        <Text style={localStyles.subtitle}>PROJECT DELIVERY</Text>
-
-        <Text style={localStyles.title}>Hello, it's a pleasure to greet you!</Text>
-
-        <Text style={localStyles.paragraph}>
-          I'm passionate about seeing local businesses grow and, after exploring a bit about your wonderful company and its values, I felt inspired.
-        </Text>
-        
-        <Text style={localStyles.paragraph}>
-          With no obligation, I've prepared this preview of how your online presence could look, so you can see the potential of MYNEXT for <Text style={{ color: colors.primary, fontWeight: 'bold' }}>{data.businessName}</Text>.
-        </Text>
-
-        <View style={localStyles.buttonContainer}>
-          <Text style={localStyles.buttonText}>Access the demo here 👇</Text>
-          <Link src={data.demoUrl} style={localStyles.button}>
-            CLICK HERE
-          </Link>
-        </View>
-
-        <Text style={localStyles.paragraph}>
-          Please review the content and technical details. I look forward to your feedback to proceed with the final adjustments and definitive delivery once the administrative process is completed.
-        </Text>
-
-        <Text style={localStyles.signoff}>Thank you for trusting MYNEXT.</Text>
-
-        {/* Monogram Watermark */}
-        <View style={localStyles.monogramContainer}>
-          <Text style={localStyles.monogramText}>MN</Text>
-        </View>
-
-        {/* Footer */}
-        <View style={localStyles.footer}>
-          <Text style={localStyles.footerText}>MADE BY MYNEXT</Text>
+        {/* Footer Monogram */}
+        <View style={proposalStyles.footerContainer}>
+          <Image src={getLogoDarkSource()} style={proposalStyles.monogramWatermark} />
+          <View style={proposalStyles.goldLine} />
+          <Text style={proposalStyles.madeByText}>MADE BY MYNEXT</Text>
         </View>
       </Page>
     </Document>

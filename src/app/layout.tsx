@@ -20,13 +20,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Next LaB | MyNext Command Center",
+  title: "NEXTOS | MyNext Command Center",
   description: "Sistema operativo interno y control centralizado para MyNext",
+  icons: {
+    icon: [
+      { url: "/logo2.jpg", type: "image/jpeg" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/logo2.jpg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "NEXTOS",
+    startupImage: "/logo2.jpg",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

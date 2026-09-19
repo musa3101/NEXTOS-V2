@@ -1,0 +1,29 @@
+{
+  "name": "NEXTOS",
+  "short_name": "NEXTOS",
+  "description": "Sistema operativo interno y control centralizado para MyNext",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple touch icon"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo2.jpg",
+      "sizes": "2000x2000",
+      "type": "image/jpeg"
+    }
+  ]
+}

@@ -19,7 +19,9 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/bg/') || 
     pathname === '/favicon.ico' || 
     pathname === '/logo1.png' || 
-    pathname === '/logo2.jpg'
+    pathname === '/logo2.jpg' ||
+    pathname.startsWith('/apple-icon') ||
+    pathname.startsWith('/icon')
   ) {
     return NextResponse.next();
   }
@@ -36,7 +38,20 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Roll the session cookie: only if the user is authenticated
+  if (session) {
+    response.cookies.set('nextos_session', session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 3 * 24 * 60 * 60, // 3 days
+    });
+  }
+
+  return response;
 }
 
 export const config = {

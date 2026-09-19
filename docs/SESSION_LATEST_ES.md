@@ -1,56 +1,61 @@
-# Última Sesión - NEXTOS V2
+# Sesión — 19 de Septiembre de 2026
 
-## 📅 Fecha: 2026-09-18
+## ¿Qué se hizo hoy?
 
-### 🛠️ Qué se ha hecho hoy:
+### 1. 📊 Base de Datos de Clientes (Cloudflare)
+- Se rastrearon todos los proyectos de Cloudflare Pages (12 proyectos)
+- Se extrajo: empresa, contacto, teléfono, email, dirección y fecha de creación
+- Se generaron `docs/clientes_cloudflare.csv` y `docs/clientes_cloudflare.json`
+- Se leyó `clientes actualizadps.numbers` y se sincronizaron los datos de contacto
 
-1. **Transformación del Bot de Telegram en Asistente de IA Conversacional:**
-   - Creado el módulo de inteligencia artificial `src/lib/telegram-ai.ts` conectado al Gateway de Modelos de InsForge con OpenRouter (`google/gemini-2.5-flash` con fallback a `meta-llama/llama-3.3-70b-instruct`).
-   - Creada la tabla `telegram_messages` en PostgreSQL InsForge con ventana ampliada a los últimos 20 mensajes.
-   - Creada la tabla `telegram_user_memory` en InsForge para memoria permanente a largo plazo.
-   - Incorporada la herramienta `remember_user_fact` para que la IA guarde acuerdos y preferencias de forma persistente.
+### 2. 🖼️ Favicon + Icono de App iPhone (PWA)
+- `favicon.ico`, `apple-icon.png` e `icon.png` reemplazados con `logo2.jpg`
+- Creado `public/manifest.json` para PWA en iOS
+- Actualizado `layout.tsx` con metadata de iconos completa
 
-2. **Inyección de Memoria Maestra sobre Musa y el Ecosistema MyNext:**
-   - Registrado en la base de datos y en el `SYSTEM_PROMPT` todo el perfil de Musa, la identidad de MyNext (`mynextbymusa.com`), NextOS y la filosofía de trabajo (dark mode luxury suizo, alto rendimiento).
-   - Registrados todos los clientes prioritarios que ya han pagado su web y están en producción:
-     1. Ecuaplac (`ecuaplac.com`)
-     2. Gran Marrakech
-     3. Tacos Marrakech (locales de Pere Garau y Plaza Columnas)
-     4. Blessed Barber Studio (`blessedstudio.pages.dev`)
-     5. Bar Luna Llena (`barlunallena.pages.dev`)
-     6. Mezquita Ar-Rahma
-     7. SaaS propios: NextTrade y NextLead
-   - Instrucción prioritaria de vigilancia: si `mynextbymusa.com` o cualquiera de las webs VIP sufre una caída o degradación, la IA avisa con máxima prioridad.
+### 3. 🔐 Sesión por Inactividad (3 días)
+- Cookie reducida de 7 a 3 días
+- El middleware renueva el cookie en cada visita (rolling)
+- Si no se abre la app en 3 días → cierra sesión automáticamente
 
-3. **Corrección de Falsos Positivos 403 en Comprobación de Cloudflare:**
-   - Corregido el bloqueo de Cloudflare WAF en dominios con DNS propio (`ecuaplac.com` y `mynextbymusa.com`).
-   - Implementadas cabeceras de navegador reales (`User-Agent` de Chrome) y doble comprobación al subdominio canónico de Cloudflare Pages (`.pages.dev`).
-   - Las 12 webs se reportan con 100% de precisión en **ONLINE (200 OK)** en Telegram, en el cron matutino y en el panel web.
+### 4. 🌅 Modal de Bienvenida (Saludo dinámico)
+- Al entrar: "Buenos días/tardes/noches, señor Musa" según hora de Madrid
+- Si llevas más de 1 hora ausente → resumen de actividad durante ausencia
+- Auto-cierre en 5s con barra de progreso dorada
 
-4. **Despliegue y Validación:**
-   - Compilación Next.js 16 con 0 errores.
-   - 24/24 tests unitarios pasando al 100%.
-   - Desplegado a producción en Vercel: `https://nextos-v2.vercel.app`.
-   - Ramas `dev` y `main` 100% sincronizadas en GitHub.
+### 5. 🔔 Push Notifications al iPhone (Web Push)
+- Service Worker (`public/sw.js`) registrado automáticamente al entrar
+- El iPhone pide permiso para notificaciones (primera vez)
+- Suscripciones guardadas en InsForge (`push_subscriptions`)
+- Icono 🔔 en el header para enviar prueba de notificación
+- Si InsForge o Cloudflare caen → push urgente automático al iPhone
+- Funciona en background con app cerrada (iOS 16.4+ + PWA instalada)
 
-### 📁 Archivos modificados:
-- `src/lib/telegram-ai.ts`
-- `src/lib/telegram.ts`
-- `src/app/api/telegram/webhook/route.ts`
-- `src/app/api/cloudflare/project-health/route.ts`
-- `src/app/api/cron/daily-report/route.ts`
-- `src/lib/cloudflare.ts`
-- `src/app/api/cloudflare/deploy/route.ts`
-- `src/components/dashboard/project-detail-modal.tsx`
-- `.env.local`
-- `docs/SESSION_LATEST_ES.md`
-- `docs/ROADMAP.md`
+## Archivos nuevos
+- `public/sw.js`, `public/manifest.json`
+- `src/lib/push.ts`
+- `src/app/api/push/subscribe/route.ts`, `src/app/api/push/send/route.ts`
+- `src/components/notifications/welcome-modal.tsx`
+- `src/components/notifications/push-init.tsx`
+- `migrations/20260919_push_subscriptions.sql`
+- `docs/clientes_cloudflare.csv`, `docs/clientes_cloudflare.json`
 
-### 🔧 Qué problemas se han solucionado:
-- El bot ya no fuerza el uso de comandos; habla en lenguaje natural en español y hace preguntas de aclaración antes de generar facturas o propuestas.
-- Solucionados los falsos 403 causados por Cloudflare WAF al hacer pings desde servidores de Vercel.
-- Dotado al bot de memoria permanente y contextualizada sobre Musa y todos sus clientes.
+## Archivos modificados
+- `src/app/api/auth/route.ts` — sesión 3 días
+- `src/proxy.ts` — cookie rolling
+- `src/app/layout.tsx` — metadata PWA
+- `src/components/layout/app-layout.tsx` — WelcomeModal + PushInit
+- `src/components/layout/header.tsx` — botón 🔔
+- `src/app/api/health/route.ts` — push si sitio cae
+- `public/favicon.ico`, `apple-icon.png`, `icon.png` — logo2
 
-### 📌 Qué queda pendiente:
-- Sección de filtros avanzados y exportación CSV de clientes y facturas.
-- Integración de transcripción directa de audios de voz de Telegram con Whisper.
+## Problemas solucionados
+- ICO en formato incorrecto (RGBA fix con Pillow)
+- TypeScript Uint8Array → ArrayBuffer
+- `string | undefined` en cookie.set
+- Tipos `web-push` → `@types/web-push`
+
+## Pendiente
+- Probar push en iPhone tras deploy a Vercel
+- Integrar `clientes_cloudflare.json` en sección Clientes de NextOS
+- Conectar bot Telegram para responder con datos de clientes al pedir facturas

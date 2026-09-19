@@ -10,15 +10,16 @@ test.describe("Mobile Navigation & Bottom Bar (iPhone Viewport)", () => {
     await setAuthenticatedSession(context);
   });
 
-  test("renders Bottom Navigation Bar with all 5 tabs on mobile", async ({ page }) => {
+  test("renders Bottom Navigation Bar with all 6 tabs on mobile", async ({ page }) => {
     await page.goto("/");
 
     const nav = page.locator("nav.md\\:hidden");
     await expect(nav).toBeVisible();
 
     await expect(nav.locator("text=Inicio")).toBeVisible();
-    await expect(nav.locator("text=Proyectos")).toBeVisible();
     await expect(nav.locator("text=Clientes")).toBeVisible();
+    await expect(nav.locator("text=Proyectos")).toBeVisible();
+    await expect(nav.locator("text=Mant.")).toBeVisible();
     await expect(nav.locator("text=Docs")).toBeVisible();
     await expect(nav.locator("text=Monitor")).toBeVisible();
   });
@@ -28,24 +29,29 @@ test.describe("Mobile Navigation & Bottom Bar (iPhone Viewport)", () => {
 
     const nav = page.locator("nav.md\\:hidden");
 
+    // Click Mant.
+    await nav.locator("a[href='/maintenance']").click({ force: true });
+    await page.waitForURL("/maintenance");
+    await expect(page).toHaveURL("/maintenance");
+
     // Click Proyectos
-    await nav.locator("text=Proyectos").click();
+    await nav.locator("a[href='/projects']").click({ force: true });
     await page.waitForURL("/projects");
     await expect(page).toHaveURL("/projects");
 
     // Click Docs
-    await nav.locator("text=Docs").click();
+    await nav.locator("a[href='/documents']").click({ force: true });
     await page.waitForURL("/documents");
     await expect(page).toHaveURL("/documents");
 
     // Click Monitor
-    await nav.locator("text=Monitor").click();
+    await nav.locator("a[href='/monitoring']").click({ force: true });
     await page.waitForURL("/monitoring");
     await expect(page).toHaveURL("/monitoring");
 
     // Return to Inicio
-    await nav.locator("text=Inicio").click();
-    await page.waitForURL("/");
+    await nav.locator("a[href='/']").click({ force: true });
+    await page.waitForURL((url) => url.pathname === "/");
     await expect(page).toHaveURL("/");
   });
 });

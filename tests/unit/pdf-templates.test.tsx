@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import React from "react";
 import { InvoiceTemplate, InvoiceData } from "@/lib/pdf/invoice-template";
 import { DeliveryTemplate, DeliveryData } from "@/lib/pdf/delivery-template";
+import { ProposalTemplate, ProposalData } from "@/lib/pdf/proposal-template";
 
 describe("PDF Templates (src/lib/pdf)", () => {
   describe("InvoiceTemplate", () => {
@@ -38,6 +39,35 @@ describe("PDF Templates (src/lib/pdf)", () => {
       const element = <InvoiceTemplate data={emptyInvoice} />;
       expect(element).toBeDefined();
       expect(element.props.data.items).toHaveLength(0);
+    });
+  });
+
+  describe("ProposalTemplate (Luxury MyNext Demo)", () => {
+    const mockProposal: ProposalData = {
+      businessName: "Restaurante Sol",
+      demoUrl: "https://restaurante-sol.pages.dev",
+      number: "PRP-2026-A1B2",
+      date: "19/09/2026",
+    };
+
+    it("creates a ProposalTemplate React element with valid data", () => {
+      const element = <ProposalTemplate data={mockProposal} />;
+      expect(element).toBeDefined();
+      expect(element.props.data.businessName).toBe("Restaurante Sol");
+      expect(element.props.data.number).toBe("PRP-2026-A1B2");
+      expect(element.props.data.demoUrl).toBe("https://restaurante-sol.pages.dev");
+    });
+
+    it("handles fallback URLs correctly", () => {
+      const fallbackProposal: ProposalData = {
+        businessName: "Cliente Sin Web",
+        demoUrl: "https://mynextbymusa.com",
+        number: "PRP-2026-0000",
+        date: "19/09/2026",
+      };
+      const element = <ProposalTemplate data={fallbackProposal} />;
+      expect(element).toBeDefined();
+      expect(element.props.data.demoUrl).toBe("https://mynextbymusa.com");
     });
   });
 

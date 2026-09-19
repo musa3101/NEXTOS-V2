@@ -39,31 +39,31 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         items: doc.template_data?.items || [],
         taxRate: doc.template_data?.taxRate || 21,
       });
+    } else if (doc.type === "proposal" || (doc.type === "delivery" && doc.template_data?.is_proposal)) {
+      pdfBuffer = await generateProposalPdf({
+        businessName: doc.template_data?.businessName || doc.template_data?.clientName || doc.clients?.company || doc.clients?.name || "Negocio",
+        demoUrl: doc.template_data?.demoUrl || "https://mynextbymusa.com",
+        number: doc.number,
+        date: new Date(doc.created_at || Date.now()).toLocaleDateString("es-ES"),
+      });
     } else if (doc.type === "delivery") {
-      if (doc.template_data?.is_proposal) {
-        pdfBuffer = await generateProposalPdf({
-          businessName: doc.template_data?.clientName || doc.template_data?.businessName || doc.clients?.company || doc.clients?.name || "Negocio",
-          demoUrl: doc.template_data?.demoUrl || "https://mynext.dev",
-          number: doc.number,
-          date: new Date(doc.created_at || Date.now()).toLocaleDateString("es-ES"),
-        });
-      } else {
-        pdfBuffer = await generateDeliveryPdf({
-          number: doc.number,
-          date: new Date(doc.created_at || Date.now()).toLocaleDateString(),
-          client: {
-            name: doc.clients?.name || "",
-            company: doc.clients?.company || "",
-          },
-          project: {
-            name: doc.projects?.name || "Proyecto",
-          },
-          summary: doc.template_data?.summary || "",
-          stack: doc.template_data?.stack || [],
-          deliverables: doc.template_data?.deliverables || [],
-          credentials: doc.template_data?.credentials || [],
-        });
-      }
+      pdfBuffer = await generateDeliveryPdf({
+        number: doc.number,
+        date: new Date(doc.created_at || Date.now()).toLocaleDateString(),
+        client: {
+          name: doc.clients?.name || "",
+          company: doc.clients?.company || "",
+        },
+        project: {
+          name: doc.projects?.name || "Proyecto",
+          demoUrl: doc.template_data?.demoUrl || doc.template_data?.project?.demoUrl || "https://mynextbymusa.com",
+          adminUrl: doc.template_data?.adminUrl || doc.template_data?.project?.adminUrl,
+        },
+        summary: doc.template_data?.summary || "",
+        stack: doc.template_data?.stack || [],
+        deliverables: doc.template_data?.deliverables || [],
+        credentials: doc.template_data?.credentials || [],
+      });
     } else {
       return new NextResponse("Invalid document type", { status: 400 });
     }

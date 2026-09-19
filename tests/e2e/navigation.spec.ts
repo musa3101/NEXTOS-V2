@@ -11,7 +11,13 @@ test.describe("Full Navigation & Routes", () => {
     await expect(page).toHaveURL("/");
     await expect(page.locator("h1:has-text('MYNEXT')")).toBeVisible();
     await expect(page.locator("text=COMMAND CENTER")).toBeVisible();
-    await expect(page.locator("text=Cloudflare Pages")).toBeVisible();
+    await expect(page.locator("text=Radar Uptime & Salud Web")).toBeVisible();
+  });
+
+  test("navigates to /maintenance page and displays Google Calendar actions", async ({ page }) => {
+    await page.goto("/maintenance");
+    await expect(page).toHaveURL("/maintenance");
+    await expect(page.locator("h1:has-text('Mantenimiento')")).toBeVisible();
   });
 
   test("navigates to /projects page", async ({ page }) => {

@@ -59,7 +59,7 @@ export default function LoginPage() {
           </div>
           <div className="text-center flex flex-col items-center">
             <h1 className="text-2xl font-bold tracking-[0.25em] text-white flex items-center justify-center gap-1.5 drop-shadow-md">
-              Next <span className="text-[#D4A853]">LaB</span>
+              NEXT<span className="text-[#D4A853]">OS</span>
             </h1>
             <div className="mt-2 flex flex-col items-center space-y-1">
               <p className="text-[10px] text-[#D4A853] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-1">

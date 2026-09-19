@@ -35,8 +35,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Generate document number e.g. INV-2026-0001
-    const prefix = type === "invoice" ? "INV" : "DEL";
+    // Generate document number e.g. INV-2026-0001 or PRP-2026-0001
+    const prefix = type === "invoice" ? "INV" : type === "proposal" ? "PRP" : "DEL";
     const year = new Date().getFullYear();
     const randomHex = Math.floor(Math.random() * 0xffff).toString(16).toUpperCase().padStart(4, '0');
     const number = `${prefix}-${year}-${randomHex}`;

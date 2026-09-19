@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "cli-v1",
+  "snapshotId": "snap_ab7ecbffaa7b79e3",
+  "testId": "4e94d371-2d63-4956-95b8-31100fe69aa0",
+  "projectId": "4f606054-90d6-4b9e-949d-1229950aac02",
+  "codeVersion": "v1.0",
+  "runIdIfAvailable": "182eb85c-1eca-4923-82a5-58aef5988492",
+  "targetUrl": "https://mynextbymusa.com",
+  "failedStepIndex": 1,
+  "failureKind": "timeout",
+  "capturedAt": "2026-09-19T12:30:56.049Z",
+  "fetchedAt": "2026-09-19T12:31:00.520Z"
+}
