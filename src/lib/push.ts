@@ -3,15 +3,28 @@
 
 import webpush from "web-push";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY!;
-const VAPID_EMAIL = process.env.VAPID_EMAIL || "mynextbymusa@gmail.com";
+let vapidConfigured = false;
 
-webpush.setVapidDetails(
-  `mailto:${VAPID_EMAIL}`,
-  VAPID_PUBLIC_KEY,
-  VAPID_PRIVATE_KEY
-);
+function ensureVapidConfigured(): boolean {
+  if (vapidConfigured) return true;
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  const email = process.env.VAPID_EMAIL || "mynextbymusa@gmail.com";
+
+  if (!publicKey || !privateKey) {
+    console.warn("[Push] VAPID keys not configured, push notifications disabled.");
+    return false;
+  }
+
+  try {
+    webpush.setVapidDetails(`mailto:${email}`, publicKey, privateKey);
+    vapidConfigured = true;
+    return true;
+  } catch (err) {
+    console.error("[Push] Failed to set VAPID details:", err);
+    return false;
+  }
+}
 
 export interface PushPayload {
   title: string;
@@ -30,6 +43,9 @@ export async function sendPushNotification(
   subscription: webpush.PushSubscription,
   payload: PushPayload
 ): Promise<{ success: boolean; error?: string }> {
+  if (!ensureVapidConfigured()) {
+    return { success: false, error: "VAPID not configured" };
+  }
   try {
     await webpush.sendNotification(
       subscription,
