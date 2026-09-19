@@ -1245,7 +1245,7 @@ export async function handleTelegramAIMultimodal(
                     parts: [
                       {
                         inline_data: {
-                          mime_type: input.mimeType || "image/jpeg",
+                          mime_type: (input.mimeType && input.mimeType.startsWith("image/")) ? input.mimeType : "image/jpeg",
                           data: rawBase64,
                         },
                       },
@@ -1280,9 +1280,11 @@ export async function handleTelegramAIMultimodal(
     const multimodalContent: any[] = [];
 
     if (input.type === "image") {
+      const imgMime = (input.mimeType && input.mimeType.startsWith("image/")) ? input.mimeType : "image/jpeg";
+      const rawB64 = input.base64DataUri.includes(",") ? input.base64DataUri.split(",")[1] : input.base64DataUri;
       multimodalContent.push({
         type: "image_url",
-        image_url: { url: input.base64DataUri },
+        image_url: { url: `data:${imgMime};base64,${rawB64}` },
       });
     } else if (input.type === "audio") {
       multimodalContent.push({

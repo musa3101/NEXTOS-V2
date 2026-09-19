@@ -84,10 +84,15 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true });
       }
 
+      const imageMime = imageData.mimeType.startsWith("image/") ? imageData.mimeType : "image/jpeg";
+      const rawBase64 = imageData.base64DataUri.includes(",")
+        ? imageData.base64DataUri.split(",")[1]
+        : imageData.base64DataUri;
+
       await handleTelegramAIMultimodal(chatId, {
         type: "image",
-        base64DataUri: imageData.base64DataUri,
-        mimeType: imageData.mimeType,
+        base64DataUri: `data:${imageMime};base64,${rawBase64}`,
+        mimeType: imageMime,
         userText: caption || "Analiza esta imagen.",
       });
 
