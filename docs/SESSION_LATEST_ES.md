@@ -31,6 +31,12 @@
 - Si InsForge o Cloudflare caen → push urgente automático al iPhone
 - Funciona en background con app cerrada (iOS 16.4+ + PWA instalada)
 
+### 6. 🎙️ Soporte Nativo de Audio Telegram (Google Gemini 3.6 Flash)
+- Configurada `GEMINI_API_KEY` en producción de Vercel
+- Integrada transcripción directa de notas de voz en Telegram con `gemini-3.6-flash:generateContent`
+- El bot escucha y comprende las notas de voz en español de Musa y responde de inmediato
+- Fijada la identidad del modelo en el prompt del sistema (NextOS AI impulsado por Google Gemini 3.6 Flash) para eliminar la alucinación antigua "Gemini 1.0 Pro"
+
 ## Archivos nuevos
 - `public/sw.js`, `public/manifest.json`
 - `src/lib/push.ts`
@@ -41,6 +47,7 @@
 - `docs/clientes_cloudflare.csv`, `docs/clientes_cloudflare.json`
 
 ## Archivos modificados
+- `src/lib/telegram-ai.ts` — transcripción nativa de audio con Gemini 3.6 Flash e identidad del modelo
 - `src/app/api/auth/route.ts` — sesión 3 días
 - `src/proxy.ts` — cookie rolling
 - `src/app/layout.tsx` — metadata PWA
@@ -54,6 +61,8 @@
 - TypeScript Uint8Array → ArrayBuffer
 - `string | undefined` en cookie.set
 - Tipos `web-push` → `@types/web-push`
+- Error de compilación Vercel por VAPID keys no inicializadas en build
+- Telegram bot decía "Gemini 1.0 Pro" y no escuchaba audios por falta de `GEMINI_API_KEY` en Vercel y formato OGG no soportado por OpenRouter
 
 ## Pendiente
 - Probar push en iPhone tras deploy a Vercel
